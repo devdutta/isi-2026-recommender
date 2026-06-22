@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Project Handbook — AI Course Recommender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --sheet:#ffffff; --ink:#14151a; --ink2:#3a3d47;
+    --dim:#71757f; --faint:#9a9ca6; --line:#ececf1; --line2:#f4f4f7;
+    --teal:#0f9488; --teal-d:#0c7a70; --teal-bg:#e6f6f4; --teal-soft:#f0faf8; --teal-bd:#cdeee9;
+    --amber-bg:#fff7e8; --amber-bd:#f3e2bf; --amber-ink:#9a6b12;
+    --rose-bg:#fdf0ee; --rose-bd:#f6d8d2; --rose-ink:#b04a38;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:940px;margin:0 auto;background:var(--sheet);min-height:100vh;box-shadow:0 0 60px rgba(20,30,60,.06)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 40px;display:flex;flex-wrap:wrap;gap:5px 18px;align-items:center}
+  nav .brand{font-weight:800;font-size:14px;color:var(--teal-d);margin-right:8px}
+  nav a{font-size:12.5px;color:var(--dim);text-decoration:none;font-weight:500;padding:3px 0;border-bottom:2px solid transparent}
+  nav a:hover{color:var(--teal-d);border-color:var(--teal)}
+
+  .pad{padding:40px 48px}
+  header.hero{padding:54px 48px 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:16px}
+  h1{font-size:40px;font-weight:800;letter-spacing:-.025em;line-height:1.05}
+  .hero .lede{margin-top:14px;font-size:17px;color:var(--ink2);max-width:680px}
+  .hero .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .fact{font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d);padding:6px 12px;border-radius:30px}
+
+  section{padding:42px 48px;border-bottom:1px solid var(--line2)}
+  .sec-no{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal);font-weight:500;letter-spacing:.1em}
+  h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:4px 0 18px}
+  h3{font-size:16px;font-weight:700;margin:24px 0 8px;color:var(--ink)}
+  p{margin-bottom:12px;color:var(--ink2)}
+  a.link{color:var(--teal-d);text-decoration:none;border-bottom:1px solid var(--teal-bd);font-weight:500}
+  a.link:hover{border-color:var(--teal)}
+  ul,ol{margin:6px 0 14px 4px;padding-left:20px}
+  li{margin-bottom:6px;color:var(--ink2)}
+  strong{color:var(--ink);font-weight:700}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#f3f4f7;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#244}
+  pre{background:#0f1b1a;color:#d7efe9;border-radius:12px;padding:16px 18px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.6;margin:10px 0 16px}
+  pre .c{color:#6f9a92}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);background:#fafbfc;font-weight:600}
+  td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:30px;white-space:nowrap}
+  .p-fam{background:var(--teal-bg);color:var(--teal-d)}
+  .p-new{background:var(--amber-bg);color:var(--amber-ink);border:1px solid var(--amber-bd)}
+  .p-opt{background:#eef0f3;color:#5d636e}
+
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .c-teal{background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d)}
+  .c-amber{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-ink)}
+  .c-rose{background:var(--rose-bg);border:1px solid var(--rose-bd);color:var(--rose-ink)}
+  .callout strong{color:inherit}
+
+  /* pipeline diagram */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:18px 0 8px}
+  .node{flex:1;min-width:120px;background:#fff;border:1.5px solid var(--teal-bd);border-radius:11px;padding:13px 12px;text-align:center;font-size:12.5px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:center}
+  .node small{display:block;font-weight:500;color:var(--dim);font-size:11px;margin-top:3px;font-family:'IBM Plex Mono',monospace}
+  .node.star{border-color:var(--teal);background:var(--teal-soft);box-shadow:0 4px 14px rgba(15,148,136,.12)}
+  .node.llm{border-style:dashed}
+  .conn{display:flex;align-items:center;justify-content:center;color:var(--teal);font-weight:800;padding:0 4px;font-size:16px}
+  @media(max-width:680px){.flow{flex-direction:column}.conn{transform:rotate(90deg);padding:4px 0}}
+
+  /* week plan */
+  .week{display:grid;grid-template-columns:96px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--line2)}
+  .week:first-of-type{border-top:none}
+  .wk-tag{font-size:11px;font-weight:700;color:var(--teal-d);background:var(--teal-bg);border-radius:8px;padding:6px 4px;text-align:center;height:fit-content}
+  .wk-tag small{display:block;font-weight:500;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:9.5px;margin-top:2px}
+  .wk-body b{font-size:14px}
+  .wk-body .touch{font-size:12px;color:var(--teal-d);font-weight:600;margin-top:3px}
+  .wk-body ul{margin:5px 0 0}
+
+  footer{padding:30px 48px;color:var(--faint);font-size:12px;font-family:'IBM Plex Mono',monospace}
+  .roles td:first-child{white-space:nowrap}
+
+  /* worked-example trace */
+  .trace{margin:14px 0 4px}
+  .tstep{display:grid;grid-template-columns:54px 1fr;gap:14px;align-items:start;padding:8px 0}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:#fff;background:var(--teal);border-radius:8px;padding:7px 0;text-align:center}
+  .tact{font-size:14px;font-weight:700;color:var(--ink)}
+  .tact span{font-weight:500;color:var(--ink2)}
+  .teg{margin-top:5px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--teal-d);background:var(--teal-soft);border:1px solid var(--teal-bd);border-radius:8px;padding:7px 11px;line-height:1.55}
+  .teg b{color:var(--ink)}
+  .tans{display:inline-block;margin-top:7px;font-size:12px;font-weight:700;color:var(--amber-ink);background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:30px;padding:3px 12px}
+  .tvar{grid-column:1 / -1;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);padding:1px 0 1px 64px}
+  .tvar::before{content:"\2193  ";color:var(--teal);font-weight:700}
+  .tpair{display:flex;gap:10px;margin-top:5px}
+  .tpair .half{flex:1;background:var(--teal-soft);border:1px solid var(--teal-bd);border-radius:8px;padding:8px 11px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .tpair .half small{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--dim);font-size:10.5px;margin-top:2px}
+
+  /* print / PDF formatting */
+  @media print{
+    body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    nav{display:none}
+    .sheet{max-width:100%;box-shadow:none}
+    header.hero{padding:30px 40px 28px}
+    section{padding:30px 40px}
+    table,pre,.callout,.week,.flow,.roles tr,.facts,.tstep,.tpair,.teg{break-inside:avoid}
+    h1,h2,h3{break-after:avoid}
+    a.link{color:var(--teal-d)}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <nav>
+    <span class="brand">◇ Project Handbook</span>
+    <a href="#charter">Charter</a>
+    <a href="#data">Data</a>
+    <a href="#build">What you build</a>
+    <a href="#team">Team</a>
+    <a href="#plan">Plan &amp; meetings</a>
+    <a href="#reading">Reading</a>
+    <a href="#report">Report</a>
+    <a href="#setup">Setup</a>
+    <a href="#howwework">How we work</a>
+    <a href="BUILD_SPEC.html" style="margin-left:auto">Build Spec →</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">ISI Summer Internship 2026 · Section 2 · Student Project Handbook</div>
+    <h1>AI Course Recommender<br>& Career Roadmap Generator</h1>
+    <p class="lede">A 7-week data-science project. You will build, compare, and evaluate a course-recommendation engine that maps a person's skill gaps to the right courses in the right order — then add an AI-written roadmap on top.</p>
+    <div class="facts">
+      <span class="fact">5 students · 1 team</span>
+      <span class="fact">Mentor: Dev Dutta</span>
+      <span class="fact">Kickoff: Fri 19 Jun 2026</span>
+      <span class="fact">Report due: 31 Jul 2026</span>
+      <span class="fact">Meetings: Thu 7–9 PM IST · Teams</span>
+    </div>
+  </header>
+
+  <!-- 1 CHARTER -->
+  <section id="charter">
+    <div class="sec-no">01</div>
+    <h2>The project, in one page</h2>
+    <p><strong>The problem.</strong> Someone with a career goal ("I want to become a Data Scientist") rarely knows which skills they're missing or which courses to take, in what order. Your system answers that: given a target role and a person's current skills, it finds the skill gap and recommends a sequenced set of courses to close it.</p>
+
+    <h3>What you will deliver</h3>
+    <ol>
+      <li><strong>A Jupyter notebook</strong> that builds <em>two</em> recommender approaches (a TF-IDF baseline and an embedding-based one), <strong>compares them</strong>, and <strong>evaluates</strong> them with proper metrics. <em>This is the graded core.</em></li>
+      <li><strong>An LLM "flourish"</strong> — one call to a free LLM (Groq) that turns the top recommendations into a friendly month-by-month roadmap.</li>
+      <li><strong>(Optional, only if time allows)</strong> a tiny demo UI that wraps the best model — in-notebook with <code>ipywidgets</code>, or as a <code>streamlit</code> app.</li>
+      <li><strong>The Project Report</strong> — the primary assessed artifact (see §07).</li>
+    </ol>
+
+    <div class="callout c-teal"><strong>The one thing that makes this Data Science, not a chatbot:</strong> the recommender — building it, comparing approaches, and measuring how good its recommendations actually are. Everything else supports that.</div>
+
+    <h3>Scope — read this carefully</h3>
+    <table>
+      <tr><th>✅ In scope</th><th>🚫 Out of scope (deliberately)</th></tr>
+      <tr>
+        <td>Curated course dataset · skill-gap logic · TF-IDF + embedding recommenders · evaluation · charts · one LLM roadmap call · optional tiny demo</td>
+        <td>Resume-PDF parsing · web scraping · user accounts/login · cloud deployment · a "production" web app</td>
+      </tr>
+    </table>
+    <div class="callout c-amber"><strong>Why so much is out of scope:</strong> 7 weeks, remote team, first real project. We are deliberately removing the parts where student projects usually collapse (file parsing, integration, deployment) so you can go <em>deep</em> on the data science and finish with a strong report. Ambition lives in the <em>evaluation</em>, not in the plumbing.</div>
+  </section>
+
+  <!-- 2 DATA -->
+  <section id="data">
+    <div class="sec-no">02</div>
+    <h2>The data (verified, downloadable)</h2>
+    <p>You need two things: a <strong>course catalog</strong> (titles + skill tags) and a <strong>role → required-skills</strong> reference. Use the one dataset below for the catalog, and hand-build the role table. Your Week-1 job is to download the dataset, open it, and confirm the columns — don't assume the schema, verify it.</p>
+
+    <h3>Course catalog — use this one dataset</h3>
+    <p><a class="link" href="https://www.kaggle.com/datasets/azraimohamad/coursera-course-data"><strong>Coursera Courses &amp; Skills Dataset 2024</strong> (Kaggle)</a> — Coursera-only, recent, ships a <strong>skills/tags column</strong>. Use the file <code>coursera_course_dataset_v3.csv</code> (<strong>623 rows</strong>). On download, run <code>print(df.columns.tolist())</code> and rename <code>Title→title</code>, <code>Skills→skills</code> (Build Spec M1 has the full map). The search text is built from <strong>Title + Skills</strong> — the dataset's <code>course_description</code> is only ~65% filled, so we don't rely on it.</p>
+    <p style="font-size:13px;color:#555"><strong>Only if that dataset is ever unavailable:</strong> any other Kaggle "Coursera / edX / Udemy courses 2024" set works too — but pick one that has a <em>skills/tags column</em> and verify it the same way. Don't shop around: one good dataset is enough.</p>
+
+    <h3>Role → required-skills reference — you build this yourself</h3>
+    <p><strong>Hand-curate a small table</strong> for ~8–10 target roles (Data Scientist, Data Analyst, ML Engineer, …), each mapped to the skills it needs. <strong>This is the main path — not a shortcut or a fallback.</strong> It's a few lines of Python (a dictionary), it removes any external dependency, and the roles you choose are part of your report. We've given you a ready starter — <code>role_skills_example.py</code> and <code>role_skills_table.txt</code> — keep the roles that fit your dataset, add more, and own the choices.</p>
+    <div class="callout c-teal"><strong>De-risking move:</strong> start Week 1 with the hand-built role table + the one course dataset, and get the whole pipeline running end-to-end on small data first. Scale up only once the basic version works.</div>
+  </section>
+
+  <!-- 3 WHAT YOU BUILD -->
+  <section id="build">
+    <div class="sec-no">03</div>
+    <h2>What you're building</h2>
+    <p>Everything below runs <strong>inside one Jupyter notebook</strong> (top to bottom). The optional demo UI can stay in the notebook (<code>ipywidgets</code>) or, only if you choose, live outside it as a <code>streamlit</code> app.</p>
+    <div class="callout c-teal"><strong>Your step-by-step build manual:</strong> this Handbook explains <em>what</em> and <em>why</em>. For the exact <em>how</em> — every module's inputs and outputs, runnable starter code, worked examples, and common errors — work from the <a class="link" href="BUILD_SPEC.html"><strong>Build Specification →</strong></a>. Read it alongside this page.</div>
+
+    <div class="flow">
+      <div class="node">Course dataset<br>+ role→skills<small>pandas</small></div>
+      <div class="conn">→</div>
+      <div class="node">Skill gap<small>set difference</small></div>
+      <div class="conn">→</div>
+      <div class="node star">Recommenders<br>TF-IDF · embeddings<small>★ the DS core</small></div>
+      <div class="conn">→</div>
+      <div class="node star">Evaluate &amp; compare<small>precision@k · charts</small></div>
+      <div class="conn">→</div>
+      <div class="node llm">LLM roadmap<small>Groq · 1 call</small></div>
+    </div>
+
+    <h3>The same flow, with a real example</h3>
+    <p><strong>Riya</strong> knows <strong>Python</strong> and wants to become a <strong>Data Scientist</strong>. Here is what each step produces for her — and where the two real questions get answered: <em>which other skills does she need?</em> and <em>which courses, in what order?</em></p>
+    <div class="trace">
+      <div class="tstep"><div class="tnum">M1</div><div>
+        <div class="tact">Load data <span>— course catalogue + the role→skills table</span></div>
+        <div class="teg">role_skills[<b>"Data Scientist"</b>] = [python, statistics, machine learning, sql, data viz, deep learning]<br>courses_raw = 623 real Coursera courses (from Kaggle)</div>
+      </div></div>
+      <div class="tvar">courses · role_skills</div>
+
+      <div class="tstep"><div class="tnum">M2</div><div>
+        <div class="tact">Clean &amp; prepare <span>— build the searchable <code>text</code> field</span></div>
+        <div class="teg">e.g. "SQL for Data Analysis" → text "sql for data analysis query databases joins…" · skills [sql]</div>
+      </div></div>
+      <div class="tvar">courses</div>
+
+      <div class="tstep"><div class="tnum">M3</div><div>
+        <div class="tact">User input + skill gap <span>— role needs − what Riya has</span></div>
+        <div class="teg">has [python] · a Data Scientist needs the 6 above<br><b>gap = [statistics, machine learning, sql, data visualization, deep learning]</b></div>
+        <div class="tans">★ Answers Q1 — the "other skills" she needs</div>
+      </div></div>
+      <div class="tvar">query_text&nbsp; (= the gap, as one string)</div>
+
+      <div class="tstep"><div class="tnum">M4/5</div><div>
+        <div class="tact">Two recommenders <span>— match the gap against every course's <code>text</code></span></div>
+        <div class="tpair"><div class="half">TF-IDF<small>ranked list</small></div><div class="half">Embeddings<small>ranked list</small></div></div>
+      </div></div>
+      <div class="tvar">tfidf_recs + embed_recs</div>
+
+      <div class="tstep"><div class="tnum">M6</div><div>
+        <div class="tact">Evaluate &amp; pick best <span>— precision@k chooses the better method</span></div>
+        <div class="teg">both methods push the gap-relevant courses to the top. TF-IDF and embeddings rank them in a <em>different order</em> — the higher-scoring method wins, and its top courses pass to M7. Compare across several roles and k values to see the real difference; there is no single fixed ranking to expect.</div>
+        <div class="tans">★ Answers Q2 — WHICH courses</div>
+      </div></div>
+      <div class="tvar">best_recs</div>
+
+      <div class="tstep"><div class="tnum">M7</div><div>
+        <div class="tact">LLM roadmap (Groq) <span>— arrange the chosen courses into an order</span></div>
+        <div class="teg">e.g. "Month 1: SQL · Month 2: Statistics · Months 3–4: Intro to ML · Month 5: Deep Learning · Month 6: Data Viz + capstone" — the LLM's <em>suggested</em> order (varies run to run)</div>
+        <div class="tans">★ Answers Q2 — the SEQUENCE</div>
+      </div></div>
+    </div>
+
+    <h3>Library map — only two libraries are new to you</h3>
+    <table>
+      <tr><th>Component</th><th>Python library</th><th></th></tr>
+      <tr><td>Data curation &amp; cleaning</td><td><code>pandas</code>, <code>numpy</code>, built-in <code>re</code></td><td><span class="pill p-fam">familiar</span></td></tr>
+      <tr><td>TF-IDF recommender (baseline)</td><td><code>scikit-learn</code> (<code>TfidfVectorizer</code>, <code>cosine_similarity</code>)</td><td><span class="pill p-fam">familiar</span></td></tr>
+      <tr><td>Embedding recommender</td><td><code>sentence-transformers</code> (pulls in <code>torch</code>)</td><td><span class="pill p-new">new</span></td></tr>
+      <tr><td>Evaluation</td><td><code>scikit-learn</code>, <code>pandas</code>, <code>numpy</code></td><td><span class="pill p-fam">familiar</span></td></tr>
+      <tr><td>Charts</td><td><code>matplotlib</code>, <code>seaborn</code></td><td><span class="pill p-fam">familiar</span></td></tr>
+      <tr><td>LLM roadmap</td><td><code>groq</code> + <code>python-dotenv</code></td><td><span class="pill p-new">new</span></td></tr>
+      <tr><td>Optional demo UI</td><td><code>ipywidgets</code> (in-notebook) or <code>streamlit</code></td><td><span class="pill p-opt">optional</span></td></tr>
+    </table>
+
+    <h3>The two recommenders, concretely</h3>
+    <p><strong>Baseline — TF-IDF + cosine similarity</strong> (verified, standard scikit-learn):</p>
+    <pre><span class="c"># from scikit-learn — turn each course's text (title + skills) into vectors, rank by similarity</span>
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+vec    = TfidfVectorizer(stop_words="english")
+matrix = vec.fit_transform(courses["text"])          <span class="c"># every course → a vector</span>
+q_vec  = vec.transform([query_text])                 <span class="c"># the skill gap → same space</span>
+scores = cosine_similarity(q_vec, matrix).flatten()  <span class="c"># one score per course</span></pre>
+    <p><strong>Second approach — semantic embeddings</strong> (from the official sentence-transformers quickstart — runs locally, free):</p>
+    <pre><span class="c"># from sbert.net quickstart</span>
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("all-MiniLM-L6-v2")
+course_emb = model.encode(courses["text"].tolist())
+q_emb      = model.encode([query_text])
+scores     = cosine_similarity(q_emb, course_emb).flatten()</pre>
+    <p>You then <strong>compare</strong> the two: which recommends more relevant courses? That comparison is the heart of the report.</p>
+
+    <h3>The LLM flourish (verified Groq quickstart)</h3>
+    <pre><span class="c"># from console.groq.com/docs/quickstart — one call, free tier, no credit card</span>
+from groq import Groq
+client = Groq(api_key=os.environ["GROQ_API_KEY"])
+course_list = "\n".join(f"- {t}" for t in best_recs["title"].head(8))
+resp = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role":"user","content": f"Turn these courses into a month-by-month roadmap:\n{course_list}"}],
+)
+print(resp.choices[0].message.content)</pre>
+    <p style="font-size:13px;color:#555">These snippets show the <em>shape</em> of each step (and use the same variables — <code>courses["text"]</code>, <code>query_text</code>, <code>best_recs</code> — throughout). The full, commented, runnable code lives in the <strong>Build Specification</strong>, your build manual.</p>
+    <div class="callout c-teal">The LLM is an <strong>add-on, not load-bearing</strong>. If the Groq call fails on demo day, the recommender study still stands on its own. That is by design.</div>
+  </section>
+
+  <!-- 4 TEAM -->
+  <section id="team">
+    <div class="sec-no">04</div>
+    <h2>The team — how you'll work together</h2>
+    <p>There are <strong>five of you</strong>. You build <strong>one notebook, together, in order</strong> — Module 0 through Module 7, a module or two at each weekly meeting. Nobody works on a separate copy: whoever is sharing their screen types while the rest follow and help, and the notebook lives in your one shared GitHub repo so there is always a single current version.</p>
+    <p>The part you <em>do</em> divide up is the <strong>report</strong> — writing is naturally a per-person job. Split the chapters so everyone owns a piece:</p>
+    <table class="roles">
+      <tr><th>Report chapter</th><th>What it covers</th></tr>
+      <tr><td><b>Background &amp; Data</b></td><td>the problem, the dataset, how you cleaned it</td></tr>
+      <tr><td><b>Methodology</b></td><td>how the two recommenders work (TF-IDF &amp; embeddings), in plain English</td></tr>
+      <tr><td><b>Results</b></td><td>precision@k, the comparison, charts — which method won and why</td></tr>
+      <tr><td><b>Intro &amp; Conclusion</b></td><td>abstract, introduction, limitations, future work — plus final assembly</td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Two rules that keep you safe:</strong> build the notebook <strong>in order</strong> (each module needs the one before it), and <strong>commit to GitHub every week</strong> so you never lose work. Stuck? Say so early in the chat.</div>
+  </section>
+
+  <!-- 5 PLAN -->
+  <section id="plan">
+    <div class="sec-no">05</div>
+    <h2>Weekly plan &amp; meeting calendar</h2>
+    <p>We meet on Microsoft Teams — the <strong>kickoff is Fri 19 Jun</strong>, then <strong>every Thursday, 7:00–9:00 PM IST</strong> through submission (7 meetings total). Each meeting reviews a concrete deliverable and your blockers. <strong>Come to every meeting with three things:</strong> what you did, what's blocking you, what's next.</p>
+    <div class="callout c-teal">The <b>module codes</b> below (M0–M8) refer to the build modules in the <a class="link" href="BUILD_SPEC.html#plan"><strong>Build Specification → Weekly Plan</strong></a>, which gives the exact build → test-run → demo steps for each sprint. This calendar and that plan are the same schedule, two views.</div>
+    <table>
+      <tr><th>Meeting</th><th>Date · 7–9 PM IST</th><th>We review / decide</th><th>Deliverable due at this meeting</th></tr>
+      <tr><td><b>1 · Kickoff</b></td><td>19 Jun · Fri</td><td>Finalize project, roles, setup plan</td><td>— (Week-1 work assigned tonight)</td></tr>
+      <tr><td><b>2</b></td><td>25 Jun</td><td>Is everyone set up? First baseline working?</td><td><span class="pill p-fam">M0 · M1 · crude M4</span><br><b>Colab + Groq + GitHub repo</b> all set up · 2 candidate datasets' columns reported · a crude TF-IDF recommender returns <em>something</em></td></tr>
+      <tr><td><b>3</b></td><td>2 Jul</td><td>Baseline + embeddings</td><td><span class="pill p-fam">M2 · M3 · M4 · M5</span><br>Clean TF-IDF recommender + skill-gap logic · embedding recommender running</td></tr>
+      <tr><td><b>4</b></td><td>9 Jul</td><td>Evaluation &amp; comparison</td><td><span class="pill p-fam">M6</span><br>Evaluation harness (precision@k) · first comparison table + charts</td></tr>
+      <tr><td><b>5</b></td><td>16 Jul</td><td>LLM step + scope freeze</td><td><span class="pill p-fam">M7</span> <span class="pill p-opt">M8?</span><br>Groq roadmap cell working · <strong>feature freeze</strong> · decision on optional demo</td></tr>
+      <tr><td><b>6</b></td><td>23 Jul</td><td>Report draft</td><td><span class="pill p-opt">optional M8</span> <span class="pill p-fam">report</span><br>Each owner's draft section · final charts/tables · notebook cleaned</td></tr>
+      <tr><td><b>7 · Final</b></td><td>30 Jul</td><td>Last review before submission</td><td>Full assembled report draft · dry-run walkthrough</td></tr>
+      <tr><td><b>Submit</b></td><td>31 Jul (Fri)</td><td>—</td><td>Final report submitted to ISI</td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Timeline reality:</strong> kickoff (Fri 19 Jun) to deadline (31 Jul) is ≈ 6 working weeks across 7 meetings (kickoff on a Friday, then weekly Thursdays). It's tight — that's exactly why scope is kept lean. No new ideas after Meeting 5's feature freeze.</div>
+  </section>
+
+  <!-- 6 READING -->
+  <section id="reading">
+    <div class="sec-no">06</div>
+    <h2>Reading list</h2>
+    <p>Grouped by topic. Start with the two <span class="pill p-new">new</span> areas — that's where your learning gap is. Everything links to <strong>official docs or established tutorials</strong> (all checked).</p>
+
+    <h3>Recommender systems — the concept</h3>
+    <ul>
+      <li><a class="link" href="https://www.datacamp.com/tutorial/recommender-systems-python">DataCamp — Recommender Systems in Python (content-based &amp; collaborative)</a></li>
+      <li><a class="link" href="https://arxiv.org/pdf/2302.02579">"Recommender Systems: A Primer" (arXiv survey)</a> — for the report's background section</li>
+    </ul>
+    <h3>TF-IDF + cosine similarity <span class="pill p-fam">familiar</span></h3>
+    <ul><li><a class="link" href="https://scikit-learn.org/stable/modules/feature_extraction.html">scikit-learn — Text feature extraction (TF-IDF)</a></li></ul>
+    <h3>Embeddings <span class="pill p-new">new</span></h3>
+    <ul>
+      <li><a class="link" href="https://www.sbert.net/docs/quickstart.html">Sentence-Transformers — Quickstart</a></li>
+      <li><a class="link" href="https://sbert.net/examples/sentence_transformer/applications/computing-embeddings/README.html">Sentence-Transformers — Computing Embeddings</a></li>
+    </ul>
+    <h3>Evaluation</h3>
+    <ul><li><a class="link" href="https://scikit-learn.org/stable/modules/model_evaluation.html">scikit-learn — Model evaluation</a> (precision/recall; <em>precision@k for ranking is usually computed manually — your mentor will walk you through it</em>)</li></ul>
+    <h3>LLM API <span class="pill p-new">new</span></h3>
+    <ul>
+      <li><a class="link" href="https://console.groq.com/docs/quickstart">Groq — Quickstart</a> · <a class="link" href="https://github.com/groq/groq-python">groq-python library</a> · <a class="link" href="https://github.com/groq/groq-api-cookbook">Groq API Cookbook</a></li>
+    </ul>
+    <h3>Tools <span class="pill p-fam">familiar</span></h3>
+    <ul>
+      <li><strong>Google Colab</strong> — <a class="link" href="https://colab.research.google.com/">Welcome to Colaboratory</a> (Google's own intro notebook) · <a class="link" href="https://www.geeksforgeeks.org/getting-started-with-google-colab/">beginner walk-through</a></li>
+      <li><a class="link" href="https://docs.streamlit.io/">Streamlit docs</a> (only if you build the optional demo as a Streamlit app)</li>
+    </ul>
+  </section>
+
+  <!-- 7 REPORT -->
+  <section id="report">
+    <div class="sec-no">07</div>
+    <h2>The Project Report</h2>
+    <p>The report is the <strong>primary assessed deliverable</strong> — and you should write it <em>as you go</em>, not in the last week.</p>
+    <div class="callout c-amber"><strong>Format pending from ISI.</strong> ISI uses its own report format, which we haven't received yet. The official template will be confirmed in <strong>Meeting 2 (25 Jun)</strong>. Until then, use the provisional outline below only as a guide for <em>what content to capture</em> — not the final structure.</div>
+    <p><strong>Provisional outline (start gathering this content now):</strong> Abstract · Introduction · Background (recommenders, TF-IDF vs embeddings) · Data · Methodology · Experiments &amp; Evaluation <em>(your strongest section)</em> · Results &amp; Discussion · Limitations &amp; Future Work · Conclusion · References · Appendix (the notebook).</p>
+    <p><strong>Divide the chapters across the team</strong> (see §04) so everyone owns a piece — e.g. Background &amp; Data · Methodology · Evaluation &amp; Results · Abstract, Introduction &amp; Conclusion · final assembly. Agree who takes what in Meeting 2.</p>
+  </section>
+
+  <!-- 8 SETUP -->
+  <section id="setup">
+    <div class="sec-no">08</div>
+    <h2>Tools, setup &amp; where things live</h2>
+
+    <h3>Where everything lives</h3>
+    <table>
+      <tr><th>Tool</th><th>Used for</th></tr>
+      <tr><td><b>Microsoft Teams</b><br>(our group community)</td><td><b>All communication, the weekly meetings (Teams video), and file sharing</b> — datasets, slides, the report, meeting notes. This is our home base.</td></tr>
+      <tr><td><b>GitHub</b><br>(one shared repo)</td><td><b>All code</b> — the notebook + <code>requirements.txt</code>. The team <b>creates one repo in Week 1</b> and commits to it every week.</td></tr>
+      <tr><td><b>Google Colab</b></td><td>The platform you <b>build on</b> — a free, browser-based Jupyter notebook. Nothing to install.</td></tr>
+    </table>
+    <div class="callout c-teal"><strong>Join the Teams community first:</strong> <a class="link" href="https://teams.live.com/l/community/FEAZwyZnE0UtNev6g">teams.live.com/l/community/FEAZwyZnE0UtNev6g</a> — everyone joins before Meeting 1 (Fri 19 Jun).</div>
+
+    <h3>New to Google Colab? Start here</h3>
+    <ul>
+      <li><a class="link" href="https://colab.research.google.com/">Welcome to Colaboratory</a> — Google's own intro notebook (it opens automatically when you visit Colab).</li>
+      <li><a class="link" href="https://www.geeksforgeeks.org/getting-started-with-google-colab/">Getting Started with Google Colab — GeeksforGeeks</a> — a short written walk-through.</li>
+    </ul>
+    <p>Colab is just Jupyter in the browser — the same kind of notebooks you used in the ML/DL sessions, but with nothing to install and an identical environment for all five of you. <code>pandas</code>, <code>numpy</code> and <code>matplotlib</code> come pre-installed; you'll <code>pip install</code> <code>sentence-transformers</code> and <code>groq</code> in a cell.</p>
+
+    <h3>Day-1 checklist (do all of this in Week 1)</h3>
+    <ol>
+      <li><strong>Join the Teams community</strong> (link above) — everyone.</li>
+      <li><strong>Google Colab</strong> — everyone signs in with a Google account at colab.research.google.com.</li>
+      <li><strong>Create ONE shared GitHub repo</strong> for the team, add a <code>requirements.txt</code>, give all five access. (You learned GitHub in the course.) <b>All code lives here.</b></li>
+      <li><strong>Free Groq key</strong> — sign up at console.groq.com (no credit card), create an API key, store it as a Colab secret / in a <code>.env</code> file. Never paste keys into shared code or GitHub.</li>
+      <li><strong>Smoke test</strong> — one Colab cell that (a) imports pandas, (b) imports <code>sentence-transformers</code>, (c) makes one Groq call. All three work → environment ready.</li>
+    </ol>
+    <div class="callout c-amber"><strong>Security:</strong> a leaked API key can be abused. Keep keys out of GitHub — use Colab Secrets or a <code>.gitignore</code>d <code>.env</code> file.</div>
+  </section>
+
+  <!-- 9 HOW WE WORK -->
+  <section id="howwework">
+    <div class="sec-no">09</div>
+    <h2>How we work together</h2>
+    <ul>
+      <li><strong>Weekly 2-hour touchpoint with the mentor.</strong> Come prepared: what you did, what's blocking you, what you'll do next. The agenda for each week is in §05.</li>
+      <li><strong>Definition of "done" each week</strong> = code committed to GitHub + a one-paragraph note of progress + blockers named. "Almost working" on a laptop doesn't count — push it.</li>
+      <li><strong>Say when you're stuck.</strong> A blocker raised on day 2 is a 10-minute fix; the same blocker hidden until the touchpoint costs a week. There is no penalty for asking.</li>
+      <li><strong>Be honest in the report.</strong> "The embedding approach didn't beat TF-IDF and here's why" is a <em>strong</em> result, not a failure. Examiners reward honest evaluation over inflated claims.</li>
+    </ul>
+    <div class="callout c-teal"><strong>Remember the goal:</strong> a working notebook you understand deeply + a report that honestly evaluates it. Not a flashy app. Depth beats shine.</div>
+  </section>
+
+  <footer>
+    ISI Summer Internship 2026 · Student Project Handbook · Mentor: Dev Dutta · v1 · All external resources verified June 2026
+  </footer>
+
+</div>
+</body>
+</html>

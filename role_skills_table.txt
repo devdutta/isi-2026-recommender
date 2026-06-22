@@ -1,0 +1,60 @@
+==============================================================================
+  ROLE -> SKILLS TABLE  (example to show / share with the team)
+  Module 1 (M1) of the Course Recommender project
+==============================================================================
+
+WHAT IT IS
+  For each career role, the list of skills that role needs.
+  In M3 we compute:   gap = (skills the role needs) - (skills you already have)
+  That gap is what the recommenders search on.
+
+------------------------------------------------------------------------------
+  ROLE                 ->  SKILLS NEEDED
+------------------------------------------------------------------------------
+  Data Scientist       ->  python, statistics, machine learning, sql,
+                           data visualization, deep learning
+
+  Data Analyst         ->  excel, sql, statistics, data visualization, python
+
+  ML Engineer          ->  python, machine learning, deep learning, sql, cloud
+
+  Data Engineer        ->  python, sql, data wrangling, cloud, big data, apis
+
+  Business Analyst     ->  excel, sql, statistics, data visualization,
+                           communication
+
+  BI Developer         ->  sql, data visualization, excel, statistics, power bi
+
+  AI Researcher        ->  python, deep learning, machine learning,
+                           mathematics, nlp
+
+  Backend Developer    ->  python, sql, apis, cloud, git
+
+  MLOps Engineer       ->  python, machine learning, cloud, docker, mlops
+
+  NLP Engineer         ->  python, machine learning, deep learning, nlp,
+                           statistics
+------------------------------------------------------------------------------
+
+3 RULES THAT KEEP THIS TABLE SANE
+  1. lowercase, always           -> write "machine learning", never "ML"
+  2. spell each skill ONE way    -> "data visualization" everywhere, not "data viz"
+  3. role is CHOSEN, not typed    -> the user picks a role from this list (a
+                                     dropdown later), never types it freely
+
+WORKED EXAMPLE (the one we use across all the docs)
+  Student knows:  python
+  Wants to be:    Data Scientist
+  Skill gap   =   statistics, machine learning, sql, data visualization, deep learning
+                  (i.e. everything a Data Scientist needs, MINUS python)
+
+WHERE THESE SKILLS COME FROM
+  This table is HAND-MADE - you curate it yourself. That is THE intended approach
+  for this project, NOT a shortcut: it's a few lines of Python (a dictionary), it
+  removes any external dependency, and the roles you pick are part of your report.
+  In the report, just note that the table is hand-curated (a large production
+  system would use a maintained skills taxonomy) - that honest framing earns marks.
+
+  >> This is a STARTING POINT. Keep the roles that fit your dataset, add more,
+     edit the skills. Owning these choices is part of your report.
+==============================================================================

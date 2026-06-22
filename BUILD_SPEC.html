@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Specification — AI Course Recommender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --sheet:#ffffff; --ink:#14151a; --ink2:#3a3d47;
+    --dim:#71757f; --faint:#9a9ca6; --line:#ececf1; --line2:#f4f4f7;
+    --teal:#0f9488; --teal-d:#0c7a70; --teal-bg:#e6f6f4; --teal-soft:#f0faf8; --teal-bd:#cdeee9;
+    --amber-bg:#fff7e8; --amber-bd:#f3e2bf; --amber-ink:#9a6b12;
+    --rose-bg:#fdf0ee; --rose-bd:#f6d8d2; --rose-ink:#b04a38;
+    --blue-bg:#eef3fd; --blue-bd:#d3e0f7; --blue-ink:#3a5fa8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:940px;margin:0 auto;background:var(--sheet);min-height:100vh;box-shadow:0 0 60px rgba(20,30,60,.06)}
+
+  nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 40px;display:flex;flex-wrap:wrap;gap:5px 18px;align-items:center}
+  nav .brand{font-weight:800;font-size:14px;color:var(--teal-d);margin-right:8px}
+  nav a{font-size:12.5px;color:var(--dim);text-decoration:none;font-weight:500;padding:3px 0;border-bottom:2px solid transparent}
+  nav a:hover{color:var(--teal-d);border-color:var(--teal)}
+
+  header.hero{padding:54px 48px 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:16px}
+  h1{font-size:38px;font-weight:800;letter-spacing:-.025em;line-height:1.07}
+  .hero .lede{margin-top:14px;font-size:17px;color:var(--ink2);max-width:700px}
+  .hero .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .fact{font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d);padding:6px 12px;border-radius:30px}
+
+  section{padding:42px 48px;border-bottom:1px solid var(--line2)}
+  .sec-no{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal);font-weight:500;letter-spacing:.1em}
+  h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:4px 0 18px}
+  h3{font-size:16px;font-weight:700;margin:24px 0 8px;color:var(--ink)}
+  h4{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-d);margin:18px 0 7px}
+  p{margin-bottom:12px;color:var(--ink2)}
+  a.link{color:var(--teal-d);text-decoration:none;border-bottom:1px solid var(--teal-bd);font-weight:500}
+  a.link:hover{border-color:var(--teal)}
+  ul,ol{margin:6px 0 14px 4px;padding-left:20px}
+  li{margin-bottom:6px;color:var(--ink2)}
+  strong{color:var(--ink);font-weight:700}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#f3f4f7;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#244}
+  pre{background:#0f1b1a;color:#d7efe9;border-radius:12px;padding:16px 18px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.6;margin:10px 0 16px}
+  pre .c{color:#6f9a92}
+  pre .k{color:#7fd3c4}
+  pre .s{color:#e6c98a}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);background:#fafbfc;font-weight:600}
+  td b{color:var(--ink)}
+  td code{font-size:12px}
+  tr:last-child td{border-bottom:none}
+
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .c-teal{background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d)}
+  .c-amber{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-ink)}
+  .c-rose{background:var(--rose-bg);border:1px solid var(--rose-bd);color:var(--rose-ink)}
+  .callout strong{color:inherit}
+
+  /* ===== WIRE DIAGRAM ===== */
+  .wire{margin:22px 0 6px;display:flex;flex-direction:column;align-items:stretch}
+  .mod{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--teal-bd);border-radius:12px;padding:13px 16px}
+  .mod .num{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:#fff;background:var(--teal);min-width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mod .body{flex:1}
+  .mod .mt{font-weight:700;font-size:14px;color:var(--ink)}
+  .mod .io{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin-top:3px}
+  .mod .io b{color:var(--teal-d);font-weight:600}
+  .mod.core{border-color:var(--teal);background:var(--teal-soft);box-shadow:0 4px 14px rgba(15,148,136,.10)}
+  .mod.opt{border-style:dashed;background:#fafbfc}
+  .mod.opt .num{background:#aab0b8}
+
+  .arrow{display:flex;flex-direction:column;align-items:center;padding:1px 0}
+  .arrow .bar{width:2px;height:11px;background:var(--teal-bd)}
+  .arrow .lbl{font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:var(--teal-bg);color:var(--teal-d);border:1px solid var(--teal-bd);border-radius:30px;padding:2px 11px;margin:1px 0;font-weight:500}
+  .arrow .tri{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--teal)}
+
+  .forknote{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin:2px 0 6px}
+  .parallel{display:flex;gap:14px}
+  .parallel .mod{flex:1}
+  @media(max-width:680px){.parallel{flex-direction:column}}
+
+  /* module spec blocks */
+  .mhead{display:flex;align-items:center;gap:12px;margin:6px 0 6px}
+  .mhead .badge{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:#fff;background:var(--teal);padding:5px 11px;border-radius:8px}
+  .mhead .badge.opt{background:#aab0b8}
+  .mhead .owner{font-size:11.5px;font-family:'IBM Plex Mono',monospace;color:var(--dim);background:#f3f4f7;border:1px solid var(--line);padding:3px 10px;border-radius:30px;margin-left:auto}
+  .mhead .due{font-size:11.5px;font-family:'IBM Plex Mono',monospace;color:var(--teal-d);background:var(--teal-bg);border:1px solid var(--teal-bd);padding:3px 10px;border-radius:30px;margin-left:8px}
+  @media(max-width:680px){.mhead{flex-wrap:wrap}.mhead .due{margin-left:0}}
+  .done{background:var(--teal-soft);border:1px solid var(--teal-bd);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:13.5px;color:var(--teal-d)}
+  .done b{color:var(--teal-d)}
+  .rep{background:var(--blue-bg);border:1px solid var(--blue-bd);border-left:4px solid var(--blue-ink);border-radius:8px;padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--blue-ink)}
+  .rep b{color:var(--blue-ink)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+  .step{counter-reset:none}
+  hr.mod-sep{border:none;border-top:1px dashed var(--line);margin:34px 0 0}
+
+  footer{padding:30px 48px;color:var(--faint);font-size:12px;font-family:'IBM Plex Mono',monospace}
+
+  /* print / PDF formatting */
+  @media print{
+    body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    nav{display:none}
+    .sheet{max-width:100%;box-shadow:none}
+    header.hero{padding:30px 40px 28px}
+    section{padding:28px 40px}
+    table,pre,.callout,.done,.rep,.mod,.mhead,.parallel,.core{break-inside:avoid}
+    h1,h2,h3,h4{break-after:avoid}
+    a.link{color:var(--teal-d)}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <nav>
+    <span class="brand">◇ Build Spec</span>
+    <a href="#how">How to use</a>
+    <a href="#wire">Pipeline</a>
+    <a href="#dict">Data dictionary</a>
+    <a href="#rules">Locked rules</a>
+    <a href="#plan">Weekly plan</a>
+    <a href="#modules">Modules</a>
+    <a href="#glossary">Glossary</a>
+    <a href="STUDENT_HANDBOOK.html" style="margin-left:auto">↩ Handbook</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">ISI Summer Internship 2026 · Section 2 · Build Specification</div>
+    <h1>How to Build the Course<br>Recommender — Step by Step</h1>
+    <p class="lede">This is your <strong>construction manual</strong>. The Handbook told you <em>what</em> the project is and <em>why</em>. This document tells you <em>exactly how to build it</em> — module by module, what goes in, what comes out, and how each piece connects to the next inside one Colab notebook.</p>
+    <div class="facts">
+      <span class="fact">9 modules · 1 notebook</span>
+      <span class="fact">read top → bottom</span>
+      <span class="fact">companion to the Handbook</span>
+    </div>
+  </header>
+
+  <!-- HOW TO USE -->
+  <section id="how">
+    <div class="sec-no">00</div>
+    <h2>How to use this document</h2>
+    <p>You are building <strong>one Jupyter notebook in Google Colab</strong>. Think of it as a factory line: data enters at the top, and each station (a <strong>module</strong>) does one job and hands its result to the next station. A module is just <strong>one labelled section of the notebook</strong> — usually 1–4 code cells.</p>
+    <div class="callout c-amber"><strong>The golden rule of this project:</strong> the <em>output</em> of one module is the <em>input</em> of the next. The connection between them is always a <strong>named Python variable</strong>. Build the modules <strong>in order</strong> and keep the variable names exactly as written here, and each step will feed cleanly into the next.</div>
+    <h3>How to work through it</h3>
+    <ol>
+      <li>Read the <a class="link" href="#wire">Pipeline diagram</a> once, fully. That is the whole project on one screen.</li>
+      <li>Keep the <a class="link" href="#dict">Data Dictionary</a> open in a second tab — it is the master list of every variable that travels between modules. It is your contract.</li>
+      <li>Build <strong>in order, 0 → 7</strong>. Do not start Module 4 before Module 2 produces clean data. Module 8 is optional and last.</li>
+      <li>For your assigned module: read its <em>Purpose</em>, copy the <em>Starter code</em> into a cell, run it, then check the <em>"Done when…"</em> box at the bottom before moving on.</li>
+      <li>When something breaks, check <em>Common errors</em> first — your bug is almost certainly listed there.</li>
+    </ol>
+    <div class="callout c-teal"><strong>The starter code is a scaffold, not the finished answer.</strong> It runs, but it is intentionally minimal. Your job — and the part that earns marks — is to understand it, improve it, and explain it in the report. Copying without understanding will show immediately when you present.</div>
+    <div class="callout c-rose"><strong>One example runs through this entire document.</strong> Meet <strong>Riya</strong>: she already knows <code>Python</code>, and she wants to become a <code>Data Scientist</code>. Watch her data flow through every module so you can see exactly what each step produces.</div>
+  </section>
+
+  <!-- WIRE DIAGRAM -->
+  <section id="wire">
+    <div class="sec-no">01</div>
+    <h2>The full pipeline — how everything connects</h2>
+    <p>Every box is a module (a section of the notebook). Every <strong>labelled arrow is the variable</strong> that one module hands to the next. Modules 4 and 5 are <strong>two different methods</strong>: they both read the same two inputs and each produces its own ranked list, which meet again at the evaluation step (M6), where you compare them.</p>
+
+    <div class="wire">
+
+      <div class="mod">
+        <span class="num">0</span>
+        <div class="body"><div class="mt">Setup</div>
+        <div class="io">in: <b>—</b> &nbsp;→&nbsp; out: <b>libraries installed · GROQ_API_KEY loaded</b></div></div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">environment ready</div><div class="tri"></div></div>
+
+      <div class="mod">
+        <span class="num">1</span>
+        <div class="body"><div class="mt">Load data</div>
+        <div class="io">in: <b>course CSV · role→skills table</b> &nbsp;→&nbsp; out: <b>courses_raw · role_skills</b></div></div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">courses_raw · role_skills</div><div class="tri"></div></div>
+
+      <div class="mod">
+        <span class="num">2</span>
+        <div class="body"><div class="mt">Clean &amp; prepare</div>
+        <div class="io">in: <b>courses_raw</b> &nbsp;→&nbsp; out: <b>courses</b> (clean table w/ <code>text</code> &amp; <code>skills</code>)</div></div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">courses</div><div class="tri"></div></div>
+
+      <div class="mod">
+        <span class="num">3</span>
+        <div class="body"><div class="mt">User input + skill gap</div>
+        <div class="io">in: <b>current_skills · target_role · role_skills</b> &nbsp;→&nbsp; out: <b>skill_gap · query_text</b></div></div>
+      </div>
+
+      <div class="forknote">↓ &nbsp; query_text + courses go into BOTH recommenders &nbsp; ↓</div>
+      <div class="parallel">
+        <div class="mod core">
+          <span class="num">4</span>
+          <div class="body"><div class="mt">TF-IDF recommender</div>
+          <div class="io">in: <b>courses.text · query_text</b><br>out: <b>tfidf_recs</b></div></div>
+        </div>
+        <div class="mod core">
+          <span class="num">5</span>
+          <div class="body"><div class="mt">Embedding recommender</div>
+          <div class="io">in: <b>courses.text · query_text</b><br>out: <b>embed_recs</b></div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">tfidf_recs + embed_recs</div><div class="tri"></div></div>
+
+      <div class="mod core">
+        <span class="num">6</span>
+        <div class="body"><div class="mt">Evaluate &amp; compare &nbsp;★ the graded heart</div>
+        <div class="io">in: <b>tfidf_recs · embed_recs · is_relevant()</b> &nbsp;→&nbsp; out: <b>eval_table · charts · winner</b></div></div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">winner · best_recs</div><div class="tri"></div></div>
+
+      <div class="mod">
+        <span class="num">7</span>
+        <div class="body"><div class="mt">Pick best + LLM roadmap (Groq)</div>
+        <div class="io">in: <b>best_recs · current_skills · target_role</b> &nbsp;→&nbsp; out: <b>roadmap_text</b></div></div>
+      </div>
+      <div class="arrow"><div class="bar"></div><div class="lbl">roadmap_text</div><div class="tri"></div></div>
+
+      <div class="mod opt">
+        <span class="num">8</span>
+        <div class="body"><div class="mt">Optional UI — only if time allows</div>
+        <div class="io">wraps Modules 3 → 7 in input boxes &nbsp;→&nbsp; out: <b>interactive demo</b></div></div>
+      </div>
+
+    </div>
+
+    <div class="callout c-teal"><strong>Read it as one sentence:</strong> load the data → work out which skills are missing → let two different methods recommend courses → measure which method is better → hand the winner's picks to an LLM to write a friendly roadmap.</div>
+  </section>
+
+  <!-- DATA DICTIONARY -->
+  <section id="dict">
+    <div class="sec-no">02</div>
+    <h2>The data dictionary — your contract</h2>
+    <p>These are <strong>every variable that travels between modules</strong>. Spell them exactly like this in your code — that consistency is what lets each module's output feed cleanly into the next as you build the notebook in order.</p>
+    <table>
+      <tr><th>Variable</th><th>Type</th><th>Created in</th><th>What it holds (example)</th></tr>
+      <tr><td><code>courses_raw</code></td><td>DataFrame</td><td>M1</td><td>The CSV exactly as downloaded, unmodified</td></tr>
+      <tr><td><code>role_skills</code></td><td>dict</td><td>M1</td><td><code>{"Data Scientist": ["python","statistics","machine learning", ...]}</code></td></tr>
+      <tr><td><code>courses</code></td><td>DataFrame</td><td>M2</td><td>Clean table. Required columns: <code>course_id, title, skills, text</code> (extra columns like <code>description, provider</code> may ride along but aren't used)</td></tr>
+      <tr><td><code>current_skills</code></td><td>list[str]</td><td>M3</td><td><code>["python"]</code></td></tr>
+      <tr><td><code>target_role</code></td><td>str</td><td>M3</td><td><code>"Data Scientist"</code> — <b>must</b> be a key in <code>role_skills</code></td></tr>
+      <tr><td><code>skill_gap</code></td><td>list[str]</td><td>M3</td><td><code>["statistics","machine learning","sql","data visualization","deep learning"]</code></td></tr>
+      <tr><td><code>query_text</code></td><td>str</td><td>M3</td><td><code>"statistics machine learning sql data visualization deep learning"</code></td></tr>
+      <tr><td><code>tfidf_recs</code></td><td>DataFrame</td><td>M4</td><td>Ranked list. Columns: <code>course_id, title, score, rank</code></td></tr>
+      <tr><td><code>embed_recs</code></td><td>DataFrame</td><td>M5</td><td>Same shape as <code>tfidf_recs</code></td></tr>
+      <tr><td><code>is_relevant()</code></td><td>function</td><td>M6</td><td>Decides if a course counts as a correct recommendation (see §03)</td></tr>
+      <tr><td><code>eval_table</code></td><td>DataFrame</td><td>M6</td><td>precision@k for each method, side by side</td></tr>
+      <tr><td><code>winner</code></td><td>str</td><td>M6</td><td><code>"Embedding"</code> or <code>"TF-IDF"</code></td></tr>
+      <tr><td><code>best_recs</code></td><td>DataFrame</td><td>M7</td><td>The winning method's ranked list (= <code>tfidf_recs</code> or <code>embed_recs</code>)</td></tr>
+      <tr><td><code>roadmap_text</code></td><td>str</td><td>M7</td><td>The month-by-month roadmap the LLM wrote</td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Build in order.</strong> The evaluation (M6) cannot run until both recommenders (M4, M5) produce their <code>_recs</code> tables in <em>exactly</em> this shape. Agree the column names early and never change them silently.</div>
+  </section>
+
+  <!-- LOCKED RULES -->
+  <section id="rules">
+    <div class="sec-no">03</div>
+    <h2>Two rules that are locked — do not redesign these</h2>
+    <p>These two decisions are made <em>for</em> you, because getting them wrong quietly breaks everything downstream. Everything else is yours to design.</p>
+
+    <h3>Rule 1 — What makes a course "relevant" (the ground truth)</h3>
+    <p>To <em>measure</em> a recommender, you need a definition of a correct answer. The raw data does not contain one, so we define it:</p>
+    <div class="callout c-teal"><strong>A recommended course is <em>relevant</em> if one of the gap skills appears (as a whole word) in its skills.</strong><br>i.e. the course teaches at least one skill the person is actually missing.</div>
+    <pre><span class="k">def</span> is_relevant(course_skills, skill_gap):
+    <span class="c"># True if a gap skill appears as a whole word in the course's skills</span>
+    skills_text = <span class="s">" "</span>.join(course_skills).lower()
+    <span class="k">return</span> any(re.search(r<span class="s">"\b"</span> + re.escape(g) + r<span class="s">"\b"</span>, skills_text) <span class="k">for</span> g <span class="k">in</span> skill_gap)</pre>
+    <div class="callout c-amber"><strong>Why not the simpler <code>set(course_skills) &amp; set(skill_gap)</code>?</strong> Because the real dataset's skills are <em>phrases</em> — e.g. <code>"Statistics for Data Science"</code>, not the bare token <code>"statistics"</code>. An exact set-match would score <code>statistics</code> as <strong>0</strong> relevant courses even though dozens teach it (verified on the real data). Whole-word matching (<code>\b…\b</code>) catches <code>statistics</code> inside <code>"statistics for data science"</code>, yet won't wrongly match <code>sql</code> inside <code>"mysql"</code>.</div>
+    <p>This is the single most important rule in the whole project — it is the yardstick every score is measured against. <strong>Discuss its limitations in your report</strong> (e.g. it treats all gap-skills as equally important, and whole-word matching can still miss synonyms like "ML" for "machine learning"). That discussion is worth marks.</p>
+
+    <h3>Rule 2 — <code>target_role</code> must match a known role</h3>
+    <p>The role the user picks must be a key that exists in <code>role_skills</code>. If you allow free typing, <code>"data scientist"</code> (lowercase) or <code>"ML Engineer"</code> will silently find nothing and the pipeline produces empty results with no error.</p>
+    <div class="callout c-rose"><strong>So:</strong> the user <em>chooses from a fixed list of roles</em> (the keys of <code>role_skills</code>) — never types a role freely. In the optional UI (M8) this becomes a dropdown, not a text box.</div>
+  </section>
+
+  <!-- WEEKLY PLAN -->
+  <section id="plan">
+    <div class="sec-no">04</div>
+    <h2>Weekly plan — what to build, test &amp; demo each week</h2>
+    <p>This is your <strong>sprint plan</strong>. The weeks between Thursday meetings are your sprints. Each sprint you <strong>build</strong> a set of modules, <strong>test-run</strong> them on real data, and <strong>demo them working</strong> at the next meeting. Build strictly in order — a later module can't run until the earlier one produces its output.</p>
+    <div class="callout c-teal"><strong>A module is "done" only when</strong> you have (1) run it on real data, (2) ticked its green <em>"Done when…"</em> box, and (3) can <em>show it working</em> at the next meeting. Code that "should work" but was never run does not count.</div>
+    <table>
+      <tr><th>Sprint</th><th>By this meeting</th><th>Build</th><th>Test-run / demo at the meeting</th></tr>
+      <tr><td><b>1</b></td><td>Mtg 2 · 25 Jun</td><td>M0 Setup · M1 Load data · a <em>crude</em> M4 (TF-IDF returns <em>something</em>)</td><td>Notebook opens in Colab · data loads · <code>role_skills</code> works · a rough recommendation prints</td></tr>
+      <tr><td><b>2</b></td><td>Mtg 3 · 2 Jul</td><td>M2 Clean · M3 Skill gap · finish M4 (clean TF-IDF) · M5 Embeddings</td><td>Both recommenders return a top-K list for the same test user</td></tr>
+      <tr><td><b>3</b></td><td>Mtg 4 · 9 Jul</td><td>M6 Evaluate &amp; compare (precision@k + charts)</td><td>Comparison table + bar chart shown · you can say which method won and why</td></tr>
+      <tr><td><b>4</b></td><td>Mtg 5 · 16 Jul</td><td>M7 LLM roadmap · <strong>feature freeze</strong> · decide on optional M8</td><td>Full end-to-end run: input → recommendations → roadmap</td></tr>
+      <tr><td><b>5</b></td><td>Mtg 6 · 23 Jul</td><td>(optional M8) · clean the notebook · draft your report sections</td><td>Notebook runs top-to-bottom with no errors · each owner's draft section</td></tr>
+      <tr><td><b>6</b></td><td>Mtg 7 · 30 Jul</td><td>Finalise report · dry-run the walkthrough</td><td>Full assembled report draft · practice presentation</td></tr>
+      <tr><td><b>—</b></td><td><b>31 Jul (Fri)</b></td><td>—</td><td><b>Submit the final report to ISI</b></td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Timeline reality:</strong> kickoff (Fri 19 Jun) to deadline (31 Jul) is ≈ 6 working weeks. It's tight — that's why scope is lean and why you build a <em>crude</em> version first (Sprint 1) and improve it, rather than waiting for perfect. <strong>No new features after the Sprint-4 freeze.</strong></div>
+  </section>
+
+  <!-- MODULES -->
+  <section id="modules">
+    <div class="sec-no">05</div>
+    <h2>The modules, in build order</h2>
+    <p>Build these in sequence. Each one: <em>what it does → exact inputs → exact outputs → how to build it → Riya's worked example → common errors → done-when.</em></p>
+
+    <!-- MODULE 0 -->
+    <div class="mhead"><span class="badge">MODULE 0</span><h3 style="margin:0">Setup &amp; environment</h3><span class="due">🗓 Sprint 1 · Mtg 2</span></div>
+    <p><strong>Purpose.</strong> Install the libraries and load your free Groq key, once, at the top of the notebook. Everything below depends on this cell having run.</p>
+    <h4>Input → Output</h4>
+    <table><tr><th>In</th><th>Out</th></tr><tr><td>nothing</td><td>all libraries importable · <code>GROQ_API_KEY</code> available via <code>os.environ</code></td></tr></table>
+    <h4>Starter code</h4>
+    <pre><span class="c"># run once, at the very top</span>
+!pip install -q sentence-transformers groq
+
+<span class="k">import</span> pandas <span class="k">as</span> pd, numpy <span class="k">as</span> np, re, os
+<span class="k">from</span> sklearn.feature_extraction.text <span class="k">import</span> TfidfVectorizer
+<span class="k">from</span> sklearn.metrics.pairwise <span class="k">import</span> cosine_similarity
+<span class="k">import</span> matplotlib.pyplot <span class="k">as</span> plt
+
+<span class="c"># paste your free Groq key here (get it from console.groq.com — no credit card)</span>
+os.environ[<span class="s">"GROQ_API_KEY"</span>] = <span class="s">"gsk_...your key..."</span></pre>
+    <div class="callout c-rose"><strong>Never commit your API key to GitHub.</strong> Before you push, replace the key with <code>"gsk_...your key..."</code> again, or use Colab's 🔑 Secrets panel. A leaked key gets disabled automatically.</div>
+    <div class="rep"><b>📄 For your report:</b> note your build environment — Google Colab, Python version, and the libraries you used (with versions: <code>pd.__version__</code> etc.). Feeds the report's <em>Setup / Tools</em> section.</div>
+    <div class="done"><b>✅ Done when:</b> the cell runs with no red errors and <code>print(os.environ["GROQ_API_KEY"][:4])</code> prints <code>gsk_</code>.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 1 -->
+    <div class="mhead"><span class="badge">MODULE 1</span><h3 style="margin:0">Load data</h3><span class="due">🗓 Sprint 1 · Mtg 2</span></div>
+    <p><strong>Purpose.</strong> Read the course catalogue into a DataFrame, and define the role→skills table. Do <em>nothing</em> else here — no cleaning yet. Just get the raw material into memory.</p>
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out</th></tr>
+      <tr><td>a course CSV file (uploaded to Colab) · the role list you decide on</td><td><code>courses_raw</code> (DataFrame) · <code>role_skills</code> (dict)</td></tr>
+    </table>
+
+    <h4>The Course CSV — what it must contain</h4>
+    <p>You're using one fixed dataset: <strong>Coursera Courses &amp; Skills 2024</strong> (Kaggle), the file <code>coursera_course_dataset_v3.csv</code> — <strong>623 rows</strong>. Two columns carry the whole pipeline:</p>
+    <table>
+      <tr><th>Column you need</th><th>Real name in v3</th><th>What it holds</th><th>Used by</th></tr>
+      <tr><td><b>title</b></td><td><code>Title</code></td><td>the course name</td><td>part of the search text + shown in recommendations</td></tr>
+      <tr><td><b>skills</b></td><td><code>Skills</code></td><td>comma-separated skills the course teaches</td><td>the search text (M4/M5) <em>and</em> the relevance check (M6)</td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Step 1 — rename the v3 columns</strong> to the names the rest of the notebook expects (the real names are capitalised, so this rename matters):
+    <pre style="margin-top:10px"><span class="c"># map the v3 dataset's column names → the names this project expects</span>
+courses_raw = courses_raw.rename(columns={
+    <span class="s">"Title"</span>:              <span class="s">"title"</span>,
+    <span class="s">"Skills"</span>:             <span class="s">"skills"</span>,
+    <span class="s">"course_description"</span>: <span class="s">"description"</span>,   <span class="c"># optional (see note)</span>
+    <span class="s">"Organization"</span>:       <span class="s">"provider"</span>,      <span class="c"># optional</span>
+    <span class="s">"course_url"</span>:         <span class="s">"url"</span>,           <span class="c"># optional</span>
+    <span class="s">"Difficulty"</span>:         <span class="s">"level"</span>,         <span class="c"># optional</span>
+})</pre></div>
+    <div class="callout c-rose"><strong>Important — we do NOT use the description.</strong> v3 has a <code>course_description</code> column, but only ~65% of rows have one and some are off-topic. So the search text is built from <code>title + skills</code> (both clean and fully populated), <em>not</em> from the description. (Details in M2.) <code>Skills</code> is the column that matters — it feeds both the search and the scoring.</div>
+
+    <div class="callout c-teal"><strong>First, get the file into Colab.</strong> The CSV does not appear by itself — upload it using the <strong>📁 Files panel</strong> on the left of Colab (drag the CSV in), then read it with <code>pd.read_csv("coursera_course_dataset_v3.csv")</code>. The file disappears when the Colab session resets, so re-upload if needed (or load it from your shared Google Drive / GitHub repo).</div>
+
+    <h4>Starter code</h4>
+    <pre><span class="c"># 1a. the course catalogue (the v3 file from the Kaggle dataset)</span>
+courses_raw = pd.read_csv(<span class="s">"coursera_course_dataset_v3.csv"</span>)
+<span class="k">print</span>(courses_raw.shape)
+<span class="k">print</span>(courses_raw.columns.tolist())   <span class="c"># LOOK at the real column names</span>
+courses_raw.head()
+
+<span class="c"># 1b. role -> required skills. Hand-made is completely fine to start.</span>
+role_skills = {
+    <span class="s">"Data Scientist"</span>: [<span class="s">"python"</span>,<span class="s">"statistics"</span>,<span class="s">"machine learning"</span>,<span class="s">"sql"</span>,<span class="s">"data visualization"</span>,<span class="s">"deep learning"</span>],
+    <span class="s">"Data Analyst"</span>:   [<span class="s">"excel"</span>,<span class="s">"sql"</span>,<span class="s">"statistics"</span>,<span class="s">"data visualization"</span>,<span class="s">"python"</span>],
+    <span class="s">"ML Engineer"</span>:    [<span class="s">"python"</span>,<span class="s">"machine learning"</span>,<span class="s">"deep learning"</span>,<span class="s">"sql"</span>,<span class="s">"cloud"</span>],
+    <span class="c"># ... add ~8-10 roles total</span>
+}</pre>
+    <div class="callout c-amber"><strong>Week-1 reality check:</strong> the v3 column names are capitalised (<code>Title</code>, <code>Skills</code>) — that's exactly why the Step-1 rename matters. Always <code>print(courses_raw.columns.tolist())</code> and confirm the names before relying on them — never assume. Report the actual columns at Meeting 2.</div>
+    <div class="rep"><b>📄 For your report:</b> record which dataset you chose and <em>why</em>, its source URL, how many rows it has, and its real column names. List the roles in your <code>role_skills</code> table. Feeds the <em>Data</em> chapter.</div>
+    <div class="done"><b>✅ Done when:</b> <code>courses_raw.head()</code> shows real rows, and <code>role_skills["Data Scientist"]</code> returns a list of skills.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 2 -->
+    <div class="mhead"><span class="badge">MODULE 2</span><h3 style="margin:0">Clean &amp; prepare</h3><span class="due">🗓 Sprint 2 · Mtg 3</span></div>
+    <p><strong>Purpose.</strong> Turn the messy raw catalogue into one tidy table with the exact columns the rest of the notebook expects. The most important output is the <code>text</code> column — the single block of words each recommender will match against.</p>
+    <div class="callout c-rose"><strong>🔁 Before you start M2:</strong> this module assumes your columns are already called <code>title</code> and <code>skills</code> — you renamed them in <strong>M1</strong>. If you skipped that rename, the very first line <code>courses["title"]</code> will crash with <code>KeyError: 'title'</code>. Fix it by going back to M1's rename step — don't patch it here.</div>
+    <h4>What M2 does — five small steps</h4>
+    <ol style="margin:4px 0 14px 20px">
+      <li><strong>Rename</strong> the columns to <code>title / skills</code> <em>(done in M1 — see the callout above)</em>.</li>
+      <li><strong>Drop junk rows</strong> — courses missing a title or skills, and duplicate titles.</li>
+      <li><strong>Renumber</strong> <code>course_id</code> to the clean row position (0, 1, 2, …).</li>
+      <li><strong>Build <code>text</code></strong> — glue <code>title + skills</code> into one cleaned, lowercase string. <em>This is the field the recommenders search.</em> (We use skills, not the description — see M1's note on why.)</li>
+      <li><strong>Make <code>skills</code> a list</strong> — split the skills cell into clean lowercase tags.</li>
+    </ol>
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out: <code>courses</code> — columns guaranteed</th></tr>
+      <tr><td><code>courses_raw</code></td><td><code>course_id</code> (int) · <code>title</code> (str) · <code>skills</code> (list[str]) · <code>text</code> (str, cleaned = title + skills)</td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre>courses = courses_raw.copy()
+
+<span class="c"># keep only rows that actually have a title + skills</span>
+courses = courses.dropna(subset=[<span class="s">"title"</span>,<span class="s">"skills"</span>]).drop_duplicates(<span class="s">"title"</span>).reset_index(drop=<span class="k">True</span>)
+courses[<span class="s">"course_id"</span>] = courses.index
+
+<span class="k">def</span> clean(s):
+    s = re.sub(r<span class="s">"[^a-z0-9 ]"</span>, <span class="s">" "</span>, str(s).lower())
+    <span class="k">return</span> re.sub(r<span class="s">"\s+"</span>, <span class="s">" "</span>, s).strip()
+
+<span class="c"># the words each recommender will match on = title + skills (NOT description)</span>
+courses[<span class="s">"text"</span>] = (courses[<span class="s">"title"</span>] + <span class="s">" "</span> + courses[<span class="s">"skills"</span>]).apply(clean)
+
+<span class="c"># NOW turn skills into a clean lowercase list (after text is built from it)</span>
+courses[<span class="s">"skills"</span>] = courses[<span class="s">"skills"</span>].fillna(<span class="s">""</span>).apply(
+    <span class="k">lambda</span> s: [x.strip().lower() <span class="k">for</span> x <span class="k">in</span> str(s).split(<span class="s">","</span>) <span class="k">if</span> x.strip()])</pre>
+
+    <div class="callout c-teal"><strong>What <code>clean()</code> does, in plain words</strong> (the two lines look scary but are simple):<br>
+    • <code>re.sub(r"[^a-z0-9 ]", " ", str(s).lower())</code> — first lower-case everything, then <strong>replace anything that is NOT a letter, number, or space with a space</strong> (so it strips punctuation like <code>/ , &amp; ( ) :</code>).<br>
+    • <code>re.sub(r"\s+", " ", s).strip()</code> — <strong>squeeze any run of spaces down to a single space</strong>, and trim the ends.<br>
+    Result: <code>"SQL for Data-Analysis (2024)!"</code> → <code>"sql for data analysis 2024"</code>. A tidy lowercase string the recommenders can match on.</div>
+
+    <div class="callout c-amber"><strong>⚠️ The skills split assumes COMMAS.</strong> The line <code>str(s).split(",")</code> only works if your dataset separates tags with commas. If it uses <code>|</code> or <code>;</code> (some do), change the <code>","</code> to match — otherwise the whole cell becomes <em>one giant wrong "skill"</em> and precision@k (M6) breaks silently. Check with <code>print(courses["skills"].iloc[0])</code> — you should see a clean list like <code>['sql']</code>, not <code>['sql | python | regression']</code>.</div>
+
+    <h4>Worked example — one real course row through M2</h4>
+    <p>A real v3 course — <em>"Learn SQL Basics for Data Science"</em> — going from raw to clean. This is exactly what your code produces:</p>
+    <table>
+      <tr><th></th><th>BEFORE — in <code>courses_raw</code> (after the M1 rename)</th><th>AFTER — in <code>courses</code></th></tr>
+      <tr><td><code>course_id</code></td><td>(its original row index)</td><td>a clean row number 0…N−1</td></tr>
+      <tr><td><code>title</code></td><td>Learn SQL Basics for Data Science</td><td>Learn SQL Basics for Data Science <em>(unchanged)</em></td></tr>
+      <tr><td><code>skills</code></td><td><code>"Databases, SQL, Data Management, Data Analysis, Big Data, …"</code> (a string)</td><td><code>["databases", "sql", "data management", "data analysis", "big data", …]</code> (a list)</td></tr>
+      <tr><td><code>text</code></td><td><em>does not exist yet</em></td><td><code>"learn sql basics for data science databases sql data management data analysis big data data model exploratory data analysis …"</code></td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--ink2,#444)"><strong>How the <code>text</code> value was made:</strong> glue <code>title</code> + a space + the <code>skills</code> string, then run <code>clean()</code> (lowercase, strip the commas and punctuation). Note <code>title</code> and <code>skills</code> aren't themselves changed — they're the raw material for <code>text</code>. When a learner's gap contains <code>"sql"</code>, this course scores high <strong>because "sql" is in its <code>text</code></strong> — that is the entire matching mechanism. <em>(We build <code>text</code> from skills, not description, because v3's description is sparse/noisy — see M1.)</em></p>
+
+    <div class="callout c-amber"><strong>Note on the v3 skills:</strong> they're comma-separated <em>phrases</em> (e.g. <code>"Statistics for Data Science"</code>, <code>"Probability &amp; Statistics"</code>), which the split above turns into clean lowercase tags. That phrasing is exactly why M6's relevance check uses <strong>whole-word matching</strong>, not exact equality.</div>
+    <div class="rep"><b>📄 For your report:</b> document every cleaning decision — rows dropped, how you built the <code>text</code> and <code>skills</code> columns, and how many courses survived (before → after counts). Reviewers reward honest data hygiene. Feeds the <em>Data</em> chapter.</div>
+    <div class="done"><b>✅ Done when:</b> <code>courses.columns</code> contains <code>course_id, title, skills, text</code>, and <code>courses["text"].iloc[0]</code> is clean lowercase words.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 3 -->
+    <div class="mhead"><span class="badge">MODULE 3</span><h3 style="margin:0">User input + skill gap</h3><span class="due">🗓 Sprint 2 · Mtg 3</span></div>
+    <p><strong>Purpose.</strong> Take the two things the user provides (skills they have + the role they want), look up what that role needs, and compute what is <em>missing</em>. The gap — not the skills they have — is what we search on.</p>
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out</th></tr>
+      <tr><td><code>current_skills</code> (list) · <code>target_role</code> (str) · <code>role_skills</code></td><td><code>skill_gap</code> (list) · <code>query_text</code> (str)</td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre><span class="c"># the only two things the user provides</span>
+current_skills = [<span class="s">"python"</span>]
+target_role    = <span class="s">"Data Scientist"</span>
+
+<span class="c"># Rule 2: the role must exist — fail loudly if not</span>
+<span class="k">assert</span> target_role <span class="k">in</span> role_skills, f<span class="s">"Pick a role from {list(role_skills)}"</span>
+
+have      = {s.lower() <span class="k">for</span> s <span class="k">in</span> current_skills}
+<span class="c"># the skills still missing, kept in the role table's order (foundational first)</span>
+skill_gap = [s <span class="k">for</span> s <span class="k">in</span> role_skills[target_role] <span class="k">if</span> s.lower() <span class="k">not in</span> have]
+query_text = <span class="s">" "</span>.join(skill_gap)         <span class="c"># the search query, as one string</span>
+
+<span class="k">print</span>(<span class="s">"Skill gap:"</span>, skill_gap)</pre>
+    <div class="callout c-teal"><strong>Reading that code, line by line</strong> (a few bits are new if you only know basic Python):<br>
+    • <code>assert target_role in role_skills, "..."</code> — <strong>stop immediately with a clear message</strong> if the role isn't in the table. This is "fail loudly" — far better than the code limping on and giving empty results (Rule 2).<br>
+    • <code>have = {s.lower() for s in current_skills}</code> — this <code>{ }</code> builds a <strong>set</strong> (a bag of unique items) of the user's skills, lower-cased. A set is used because checking "is X in here?" is fast and case is normalised.<br>
+    • <code>skill_gap = [s for s in role_skills[target_role] if s.lower() not in have]</code> — read it as: "<strong>go through each skill the role needs; keep it only if the user doesn't already have it.</strong>" What's left is the gap.<br>
+    • <code>" ".join(skill_gap)</code> — glue the gap skills into one space-separated string, because the recommenders search on a single block of text.</div>
+    <h4>Riya's worked example</h4>
+    <table>
+      <tr><th>needed (Data Scientist)</th><th>has</th><th>→ skill_gap</th></tr>
+      <tr><td>python, statistics, machine learning, sql, data visualization, deep learning</td><td>python</td><td><b>statistics, machine learning, sql, data visualization, deep learning</b></td></tr>
+    </table>
+    <p><code>query_text = "statistics machine learning sql data visualization deep learning"</code></p>
+    <div class="rep"><b>📄 For your report:</b> explain the skill-gap idea in your own words and walk through Riya's example (needed − has = gap). State which roles your system supports. Feeds the <em>Methodology</em> chapter.</div>
+    <div class="done"><b>✅ Done when:</b> for Riya, <code>skill_gap</code> has 5 items and <code>query_text</code> is the 5 skills joined by spaces.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 4 -->
+    <div class="mhead"><span class="badge">MODULE 4</span><h3 style="margin:0">TF-IDF recommender (the baseline)</h3><span class="due">🗓 Sprint 1→2 · Mtg 2–3</span></div>
+    <p><strong>Purpose.</strong> The simple, honest baseline. Turn every course's <code>text</code> into a word-frequency vector, turn the <code>query_text</code> into the same kind of vector, and rank courses by how similar they are. No machine learning training — just counting and weighting words.</p>
+
+    <h4>New concept — TF-IDF &amp; cosine similarity (read this first)</h4>
+    <p><strong>TF-IDF</strong> turns a piece of text into a list of numbers (a "vector") by counting its words — but cleverly: a word counts for <em>more</em> if it is rare across all courses (distinctive), and <em>less</em> if it shows up everywhere (like "course" or "learn").</p>
+    <p>Tiny example — three one-line courses:</p>
+    <table>
+      <tr><th>Course</th><th>Its words</th></tr>
+      <tr><td>C1</td><td>python · machine · learning</td></tr>
+      <tr><td>C2</td><td>python · data · analysis</td></tr>
+      <tr><td>C3</td><td>yoga · meditation</td></tr>
+    </table>
+    <p><code>python</code> appears in 2 of 3 courses → common → <em>low</em> weight. <code>yoga</code> appears in only 1 → rare → <em>high</em> weight. So TF-IDF gives each course a set of numbers that emphasise its <strong>distinctive</strong> words.</p>
+    <p><strong>Cosine similarity</strong> then scores how alike two of these number-vectors are, from <code>0</code> (nothing in common) to <code>1</code> (identical). We turn the user's skill gap into the same kind of vector and rank every course by its cosine similarity to it.</p>
+    <div class="callout c-teal">For the query <code>"machine learning"</code>: <strong>C1</strong> (python machine learning) shares both words → high score (≈0.8) → recommended. <strong>C3</strong> (yoga meditation) shares nothing → score 0 → not recommended. That ranking is exactly what this module outputs.</div>
+
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out: <code>tfidf_recs</code></th></tr>
+      <tr><td><code>courses.text</code> · <code>query_text</code></td><td>top-K DataFrame: <code>course_id, title, score, rank</code></td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre>vec    = TfidfVectorizer(stop_words=<span class="s">"english"</span>)
+matrix = vec.fit_transform(courses[<span class="s">"text"</span>])     <span class="c"># every course → a vector</span>
+q_vec  = vec.transform([query_text])              <span class="c"># the gap → same vector space</span>
+
+scores = cosine_similarity(q_vec, matrix).flatten()  <span class="c"># one score per course</span>
+
+K   = 10
+top = scores.argsort()[::-1][:K]                  <span class="c"># indexes of the K best</span>
+tfidf_recs = courses.loc[top, [<span class="s">"course_id"</span>,<span class="s">"title"</span>]].copy()
+tfidf_recs[<span class="s">"score"</span>] = scores[top]
+tfidf_recs[<span class="s">"rank"</span>]  = range(1, len(tfidf_recs)+1)
+tfidf_recs</pre>
+    <div class="callout c-teal"><strong>The one cryptic line, decoded:</strong> <code>scores.argsort()[::-1][:K]</code><br>
+    • <code>scores.argsort()</code> → gives the course <em>positions</em> sorted from <strong>lowest score to highest</strong> (worst → best).<br>
+    • <code>[::-1]</code> → <strong>reverses</strong> it, so now it's best → worst.<br>
+    • <code>[:K]</code> → takes the <strong>first K</strong>, i.e. the top-K courses.<br>
+    So the whole line means "<strong>give me the row positions of the K highest-scoring courses</strong>." <em>(The same trick appears in M5 — you'll recognise it.)</em></div>
+    <div class="callout c-amber"><strong>Imports:</strong> <code>TfidfVectorizer</code> and <code>cosine_similarity</code> are imported once in the <strong>M0 setup cell</strong> — you don't re-import them here. If you get <code>NameError: TfidfVectorizer is not defined</code>, you simply haven't run the M0 cell yet.</div>
+    <div class="callout c-rose"><strong>Common error:</strong> calling <code>vec.fit_transform()</code> again on the query. Use <code>vec.transform()</code> for the query — the vectorizer was already <em>fitted</em> on the courses, and the query must live in that same vocabulary.</div>
+    <div class="rep"><b>📄 For your report:</b> explain TF-IDF + cosine similarity in plain English, and paste a sample top-10 table for one user (e.g. Riya). Feeds <em>Methodology (baseline)</em>.</div>
+    <div class="done"><b>✅ Done when:</b> <code>tfidf_recs</code> has exactly K rows, ranks 1…K, and scores descending.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 5 -->
+    <div class="mhead"><span class="badge">MODULE 5</span><h3 style="margin:0">Embedding recommender (the smart version)</h3><span class="due">🗓 Sprint 2 · Mtg 3</span></div>
+    <p><strong>Purpose.</strong> The same idea as Module 4 — rank courses by similarity to the gap — but using a pretrained model that understands <em>meaning</em>, not just exact words. So "ML" and "machine learning" land close together, where TF-IDF sees two unrelated words.</p>
+
+    <h4>New concept — embeddings (read this first)</h4>
+    <p>Like TF-IDF, <strong>embeddings</strong> turn text into numbers — but instead of <em>counting words</em>, a pretrained AI model <em>reads</em> the text and produces numbers that capture its <strong>meaning</strong>. Texts that mean similar things get similar numbers, even when they use completely different words.</p>
+    <p>Why that matters — the same query, <code>"machine learning"</code>, against two courses:</p>
+    <table>
+      <tr><th>Course</th><th>TF-IDF (exact words)</th><th>Embeddings (meaning)</th></tr>
+      <tr><td>"machine learning fundamentals"</td><td>✅ high — shares the words</td><td>✅ high</td></tr>
+      <tr><td>"deep neural networks &amp; AI"</td><td>❌ ≈0 — no shared words</td><td>✅ high — related meaning</td></tr>
+    </table>
+    <p>TF-IDF <em>misses</em> the second course because the words don't overlap; embeddings <em>catch</em> it because the model knows the topics are related. <strong>Whether that actually gives better recommendations is exactly what you measure in Module 6.</strong></p>
+
+    <div class="callout c-teal"><strong>Notice:</strong> the ranking logic (cosine similarity → argsort → top-K) is <em>identical</em> to Module 4. <strong>The only thing that changes is how text becomes numbers.</strong> Make this point in your report — it is the cleanest way to explain the comparison.</div>
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out: <code>embed_recs</code></th></tr>
+      <tr><td><code>courses.text</code> · <code>query_text</code></td><td>same shape as <code>tfidf_recs</code>: <code>course_id, title, score, rank</code></td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre><span class="k">from</span> sentence_transformers <span class="k">import</span> SentenceTransformer
+model = SentenceTransformer(<span class="s">"all-MiniLM-L6-v2"</span>)     <span class="c"># small, free, runs in Colab</span>
+
+course_emb = model.encode(courses[<span class="s">"text"</span>].tolist(), show_progress_bar=<span class="k">True</span>)
+q_emb      = model.encode([query_text])
+
+scores = cosine_similarity(q_emb, course_emb).flatten()   <span class="c"># SAME ranking as M4</span>
+
+K   = 10
+top = scores.argsort()[::-1][:K]
+embed_recs = courses.loc[top, [<span class="s">"course_id"</span>,<span class="s">"title"</span>]].copy()
+embed_recs[<span class="s">"score"</span>] = scores[top]
+embed_recs[<span class="s">"rank"</span>]  = range(1, len(embed_recs)+1)
+embed_recs</pre>
+    <div class="callout c-amber"><strong>First run is slow</strong> (it downloads the model, ~90 MB, and encodes every course). That is normal. Run it once; Colab keeps it in memory after that. Keep <code>K</code> the same value as Module 4 so the comparison is fair.</div>
+    <div class="rep"><b>📄 For your report:</b> explain how embeddings differ from TF-IDF (meaning vs exact words), and show the <em>same</em> user's top-10 side by side with Module 4 so the contrast is visible. Feeds <em>Methodology (embeddings)</em>.</div>
+    <div class="done"><b>✅ Done when:</b> <code>embed_recs</code> has the same columns and K rows as <code>tfidf_recs</code>, and the two lists are <em>different</em> (if identical, something is wrong).</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 6 -->
+    <div class="mhead"><span class="badge">MODULE 6</span><h3 style="margin:0">Evaluate &amp; compare ★</h3><span class="due">🗓 Sprint 3 · Mtg 4</span></div>
+    <p><strong>Purpose.</strong> This is the graded heart of the project. Measure how good each recommender is using <strong>precision@k</strong> — of the top-K courses it recommended, how many were genuinely relevant (per the <a class="link" href="#rules">locked <code>is_relevant()</code> rule</a>) — then compare, chart, and declare a winner.</p>
+
+    <h4>New concept — what is precision@k? (read this first)</h4>
+    <p>You have probably seen <em>precision</em> in theory. <strong>precision@k</strong> is the version used for ranked lists like recommendations. Plain definition:</p>
+    <div class="callout c-teal"><strong>precision@k = out of the top <em>k</em> courses the recommender suggested, the fraction that were actually relevant.</strong></div>
+    <p>Worked example. Say the recommender returns its <strong>top 5</strong> courses for Riya (so <code>k = 5</code>). We check each one: does it teach a skill Riya is missing?</p>
+    <table>
+      <tr><th>Rank</th><th>Recommended course</th><th>Teaches a missing skill?</th></tr>
+      <tr><td>1</td><td>SQL for Data Analysis</td><td>✅ yes (sql)</td></tr>
+      <tr><td>2</td><td>Intro to Machine Learning</td><td>✅ yes (machine learning)</td></tr>
+      <tr><td>3</td><td>Yoga for Beginners</td><td>❌ no</td></tr>
+      <tr><td>4</td><td>Deep Learning Specialization</td><td>✅ yes (deep learning)</td></tr>
+      <tr><td>5</td><td>Cooking 101</td><td>❌ no</td></tr>
+    </table>
+    <p>3 of the 5 were relevant, so:</p>
+    <pre>precision@5 = 3 / 5 = <span class="s">0.6</span></pre>
+    <p><strong>Higher is better.</strong> A precision@5 of 1.0 means every one of the top 5 was useful; 0.0 means none were. You compute this same number for <em>both</em> recommenders and compare — the higher one wins.</p>
+    <div class="callout c-amber"><strong>The one question this raises:</strong> who decides the ✅/❌ in that table? <strong>You do — with one rule</strong>, fixed in <a class="link" href="#rules">§03</a>: a course counts as relevant if one of the gap skills appears (as a whole word) in its skills. That rule is <code>is_relevant()</code>, and it is the yardstick behind every score here.</div>
+
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out</th></tr>
+      <tr><td><code>tfidf_recs</code> · <code>embed_recs</code> · <code>courses</code> · <code>skill_gap</code></td><td><code>eval_table</code> (DataFrame) · a bar chart · <code>winner</code> (str)</td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre><span class="k">def</span> is_relevant(course_skills, skill_gap):
+    skills_text = <span class="s">" "</span>.join(course_skills).lower()
+    <span class="k">return</span> any(re.search(r<span class="s">"\b"</span> + re.escape(g) + r<span class="s">"\b"</span>, skills_text) <span class="k">for</span> g <span class="k">in</span> skill_gap)
+
+<span class="k">def</span> precision_at_k(recs, courses, skill_gap, k=10):
+    hits = 0
+    <span class="k">for</span> cid <span class="k">in</span> recs.head(k)[<span class="s">"course_id"</span>]:
+        cskills = courses.loc[courses[<span class="s">"course_id"</span>]==cid, <span class="s">"skills"</span>].iloc[0]
+        hits += is_relevant(cskills, skill_gap)
+    <span class="k">return</span> hits / k
+
+p_tfidf = precision_at_k(tfidf_recs, courses, skill_gap, k=10)
+p_embed = precision_at_k(embed_recs, courses, skill_gap, k=10)
+
+eval_table = pd.DataFrame({<span class="s">"method"</span>:[<span class="s">"TF-IDF"</span>,<span class="s">"Embedding"</span>],
+                           <span class="s">"precision@10"</span>:[p_tfidf, p_embed]})
+winner = <span class="s">"Embedding"</span> <span class="k">if</span> p_embed &gt;= p_tfidf <span class="k">else</span> <span class="s">"TF-IDF"</span>
+
+eval_table.plot.bar(x=<span class="s">"method"</span>, y=<span class="s">"precision@10"</span>, legend=<span class="k">False</span>)
+plt.title(<span class="s">"Which recommender is better?"</span>); plt.ylabel(<span class="s">"precision@10"</span>); plt.show()</pre>
+    <div class="callout c-teal"><strong>This is the most important code in the project — so here it is line by line:</strong><br>
+    • <code>re.search(r"\b" + g + r"\b", skills_text)</code> — checks whether the gap skill <code>g</code> appears as a <strong>whole word</strong> in the course's skills text; <code>any(... for g in skill_gap)</code> asks "<strong>does at least one gap skill show up?</strong>" → that's what makes a course "relevant". (Whole-word, so <code>statistics</code> matches <code>"statistics for data science"</code> but <code>sql</code> won't falsely match <code>"mysql"</code>.)<br>
+    • <code>hits += is_relevant(...)</code> — <code>is_relevant</code> returns <code>True</code>/<code>False</code>, and in Python <strong><code>True</code> counts as 1, <code>False</code> as 0</strong>. So this adds 1 for every relevant course. After the loop, <code>hits</code> = how many of the top-k were relevant.<br>
+    • <code>courses.loc[courses["course_id"]==cid, "skills"].iloc[0]</code> — looks dense, reads simply: "<strong>find the row whose <code>course_id</code> is <code>cid</code>, and take its <code>skills</code> list.</strong>" The <code>.iloc[0]</code> just grabs that single value out of the one-row result.<br>
+    • <code>hits / k</code> — relevant-count ÷ how-many-we-checked = <strong>precision@k</strong>. Exactly the 3/5 = 0.6 from the example above.</div>
+    <div class="callout c-amber"><strong>Imports:</strong> <code>pd</code> (pandas) and <code>plt</code> (matplotlib) come from the <strong>M0 setup cell</strong>. <code>is_relevant()</code> is the <em>same</em> rule locked in §03 — define it once and reuse it; don't write a second version.<br><strong>Keep <code>k</code> here equal to the <code>K</code> you chose in M4/M5.</strong> If M4 returns only 5 courses but you call <code>precision_at_k(..., k=10)</code>, it divides by 10 while checking 5 — the score comes out wrongly low and the comparison is unfair.</div>
+    <div class="callout c-teal"><strong>Go further for more marks:</strong> compute precision@k for several values of k (3, 5, 10), test several different roles (not just Data Scientist), and average. <strong>This matters here:</strong> on this dataset a single role can score 1.0 at k=10 for <em>both</em> methods (a tie) — so testing several roles and k values is what actually reveals the difference between TF-IDF and embeddings. <em>This is where your ambition belongs.</em></div>
+    <div class="rep"><b>📄 For your report — this is your <em>Results</em> chapter:</b> paste the <code>eval_table</code>, the bar chart, and 2–3 sentences interpreting <em>which method won and why</em>. Critically discuss the limits of your <code>is_relevant()</code> rule. This section carries the most marks — invest here.</div>
+    <div class="done"><b>✅ Done when:</b> <code>eval_table</code> shows two precision scores, the bar chart renders, and <code>winner</code> holds one of the two method names.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 7 -->
+    <div class="mhead"><span class="badge">MODULE 7</span><h3 style="margin:0">Pick best + LLM roadmap (Groq)</h3><span class="due">🗓 Sprint 4 · Mtg 5</span></div>
+    <p><strong>Purpose.</strong> Take the winning recommender's top courses and ask a free LLM to turn the bare list into an encouraging, human, month-by-month roadmap. This is the "flourish" — one API call, on top of a study that already stands on its own.</p>
+    <h4>Input → Output</h4>
+    <table>
+      <tr><th>In</th><th>Out</th></tr>
+      <tr><td><code>winner</code> · <code>tfidf_recs</code>/<code>embed_recs</code> · <code>current_skills</code> · <code>target_role</code></td><td><code>roadmap_text</code> (str)</td></tr>
+    </table>
+    <h4>Starter code</h4>
+    <pre><span class="k">from</span> groq <span class="k">import</span> Groq
+client = Groq(api_key=os.environ[<span class="s">"GROQ_API_KEY"</span>])
+
+best_recs   = embed_recs <span class="k">if</span> winner==<span class="s">"Embedding"</span> <span class="k">else</span> tfidf_recs
+course_list = <span class="s">"\n"</span>.join(f<span class="s">"- {t}"</span> <span class="k">for</span> t <span class="k">in</span> best_recs[<span class="s">"title"</span>].head(8))
+
+prompt = f<span class="s">"""You are helping a learner plan their upskilling.
+
+Current skills: {', '.join(current_skills)}
+Target role: {target_role}
+Skills they still need (the gap): {', '.join(skill_gap)}
+
+Recommended courses — use ONLY these, do not invent or add any:
+{course_list}
+
+Write a month-by-month learning roadmap that:
+- uses ONLY the courses listed above,
+- orders them sensibly: foundational skills (e.g. SQL, statistics) before
+  advanced ones (e.g. machine learning, deep learning),
+- gives one short sentence per course on why it sits at that point,
+- is realistic for a part-time learner over ~6 months,
+- ends with one line stating this is a SUGGESTED order, not a verified
+  prerequisite plan.
+
+Keep the tone encouraging and concise."""</span>
+
+resp = client.chat.completions.create(
+    model=<span class="s">"llama-3.3-70b-versatile"</span>,          <span class="c"># verify current models at console.groq.com/docs/models</span>
+    messages=[{<span class="s">"role"</span>:<span class="s">"user"</span>,<span class="s">"content"</span>:prompt}])
+
+roadmap_text = resp.choices[0].message.content
+<span class="k">print</span>(roadmap_text)</pre>
+    <div class="callout c-amber"><strong>Auth error / <code>KeyError: 'GROQ_API_KEY'</code>?</strong> Your key isn't loaded. It's set once in the <strong>M0 setup cell</strong> (<code>os.environ["GROQ_API_KEY"] = "gsk_..."</code>) — re-run M0, then this cell. Never paste the key directly here, and never commit it to GitHub.</div>
+    <div class="callout c-amber"><strong>Model names change.</strong> If you get a "model not found" error, the model name was retired — check the current free models at <code>console.groq.com/docs/models</code> and swap it in. Do not guess.</div>
+    <div class="callout c-rose"><strong>Limitation to own in your report:</strong> the roadmap's <em>ordering</em> is the LLM's best guess from general knowledge — the system does <strong>not</strong> model real course prerequisites (no dataset carries that). Present it as a <em>suggested</em> order, not a verified one. Note in your report that true prerequisite sequencing (a prerequisite graph + topological sort) is <em>future work</em>. Also: the "use ONLY these courses" wording in the prompt is what stops the LLM inventing courses — keep it.</div>
+    <div class="rep"><b>📄 For your report:</b> include one full example roadmap (Riya's), and 2–3 sentences on what the LLM adds and its limits (it can't verify the courses; it just narrates). Feeds the <em>Conclusion / extensions</em> section (Student 5).</div>
+    <div class="done"><b>✅ Done when:</b> <code>roadmap_text</code> is a multi-paragraph roadmap that names courses from <code>best_recs</code>. If the call fails, the project still passes — this step is optional polish.</div>
+
+    <hr class="mod-sep">
+
+    <!-- MODULE 8 -->
+    <div class="mhead"><span class="badge opt">MODULE 8</span><h3 style="margin:0">Optional UI — only if everything else is done</h3><span class="due">🗓 Sprint 4–5 · optional</span></div>
+    <p><strong>Purpose.</strong> Wrap Modules 3→7 behind simple input boxes so a non-coder can use it. <strong>Do not start this until the notebook is complete and the report is drafted.</strong> It earns no extra marks on its own — it is a demo nicety.</p>
+    <div class="callout c-teal">The Handbook calls this the <em>optional demo</em>. Two ways to build it: <strong><code>ipywidgets</code></strong> (simplest — stays inside the notebook, shown below) or a <strong><code>streamlit</code></strong> app (separate file, more work). Either is fine; both are optional.</div>
+    <h4>Simplest version — inside the notebook, no extra tools</h4>
+    <pre><span class="k">import</span> ipywidgets <span class="k">as</span> widgets
+skills = widgets.Text(description=<span class="s">"Your skills:"</span>)            <span class="c"># comma-separated</span>
+role   = widgets.Dropdown(options=list(role_skills), description=<span class="s">"Target role:"</span>)
+go     = widgets.Button(description=<span class="s">"Get my roadmap"</span>)
+display(skills, role, go)
+<span class="c"># on click: read the boxes, then re-run Modules 3 → 7 with those values</span></pre>
+    <div class="callout c-rose"><strong>Remember Rule 2:</strong> the role is a <code>Dropdown</code> (fixed choices), never a free text box — otherwise an unknown role silently returns nothing.</div>
+    <div class="rep"><b>📄 For your report:</b> if you built it, add a screenshot and a line on how it works. If you didn't, list it as <em>future work</em> in the Conclusion — that is a perfectly good outcome. (Student 5)</div>
+    <div class="done"><b>✅ Done when:</b> (only if attempted) typing skills + picking a role + clicking the button prints recommendations and the roadmap.</div>
+  </section>
+
+  <!-- GLOSSARY -->
+  <section id="glossary">
+    <div class="sec-no">06</div>
+    <h2>Plain-English glossary</h2>
+    <table>
+      <tr><th>Term</th><th>In one sentence</th></tr>
+      <tr><td><b>TF-IDF</b></td><td>A way to turn text into numbers by counting words, giving rare-but-meaningful words more weight than common ones.</td></tr>
+      <tr><td><b>Embedding</b></td><td>A way to turn text into numbers using a pretrained model, so that pieces of text with similar <em>meaning</em> get similar numbers.</td></tr>
+      <tr><td><b>Cosine similarity</b></td><td>A score from 0 to 1 measuring how close two vectors point in the same direction — i.e. how similar two pieces of text are.</td></tr>
+      <tr><td><b>Skill gap</b></td><td>The skills a target role needs minus the skills the person already has = what they still need to learn.</td></tr>
+      <tr><td><b>precision@k</b></td><td>Out of the top <em>k</em> courses recommended, the fraction that were genuinely relevant. Higher = better recommender.</td></tr>
+      <tr><td><b>Ground truth</b></td><td>The "correct answer" you measure against. Here: our <code>is_relevant()</code> rule defines it.</td></tr>
+      <tr><td><b>Baseline</b></td><td>The simplest reasonable method (TF-IDF), used as a yardstick to judge whether the fancier method (embeddings) is actually worth it.</td></tr>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>

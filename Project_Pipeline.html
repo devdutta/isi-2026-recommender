@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Recommender — Project Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+  .canvas{width:860px;padding:40px 40px 48px;margin:0 auto;display:flex;flex-direction:column;align-items:center;background:#fff}
+
+  .title{font-size:27px;font-weight:800;letter-spacing:-.02em;color:#14151a;text-align:center}
+  .subtitle{font-size:13px;color:#9a6b12;font-family:'IBM Plex Mono',monospace;margin-top:6px;margin-bottom:26px;text-align:center}
+
+  .box{border-radius:13px;padding:14px 18px;text-align:center;font-size:15px;font-weight:700;color:#14151a;border:2px solid;min-width:280px}
+  .box small{display:block;font-weight:500;font-size:12px;margin-top:3px;font-family:'IBM Plex Mono',monospace;opacity:.8}
+
+  .blue{background:#cfe4ff;border-color:#86b4f0}
+  .sky{background:#d6f0f7;border-color:#7cc4d8}
+  .purple{background:#e2d6fb;border-color:#a98ee8}
+  .green{background:#c8efce;border-color:#7fcf8f}
+  .yellow{background:#ffe6a3;border-color:#e8b94e}
+  .teal{background:#bdeee2;border-color:#2fae93}
+  .dashed{background:#fafbfc;border:2px dashed #b8bcc4;color:#5d636e;font-weight:600}
+
+  .arrow{color:#9aa0a8;font-size:17px;line-height:1;margin:7px 0}
+
+  .core{background:#eef9f2;border:1.5px solid #cdeee9;border-radius:16px;padding:16px 20px 20px;margin:2px 0;display:flex;flex-direction:column;align-items:center;width:680px}
+  .corelabel{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.08em;color:#0c7a70;align-self:flex-start;margin-bottom:14px}
+  .pair{display:flex;gap:22px;justify-content:center}
+  .pair .box{min-width:250px}
+  .narrow{min-width:300px}
+
+  .row{display:flex;gap:20px;justify-content:center;align-items:stretch}
+  .row .box{min-width:250px;display:flex;flex-direction:column;justify-content:center}
+</style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="title">Course Recommender — Project Pipeline</div>
+    <div class="subtitle">Built entirely in one Jupyter notebook (Google Colab)</div>
+
+    <div class="box blue">Course dataset + role-skills<small>pandas · load</small></div>
+    <div class="arrow">▼</div>
+    <div class="box sky">Clean &amp; prepare<small>tidy data · build the text column</small></div>
+    <div class="arrow">▼</div>
+    <div class="box purple">Compute skill gap<small>role needs − current skills</small></div>
+    <div class="arrow">▼</div>
+
+    <div class="core">
+      <div class="corelabel">★ DATA-SCIENCE CORE — THE GRADED PART</div>
+      <div class="pair">
+        <div class="box green">TF-IDF recommender<small>scikit-learn</small></div>
+        <div class="box green">Embedding recommender<small>sentence-transformers</small></div>
+      </div>
+      <div class="arrow">▼</div>
+      <div class="box yellow narrow">Evaluate &amp; compare<small>precision@k · charts</small></div>
+    </div>
+
+    <div class="arrow">▼</div>
+    <div class="box purple">Pick best recommender</div>
+    <div class="arrow">▼</div>
+    <div class="row">
+      <div class="box teal">LLM roadmap<small>Groq — free, 1 call</small></div>
+      <div class="box dashed">Optional: demo UI<small>ipywidgets or Streamlit · if time allows</small></div>
+    </div>
+  </div>
+</body>
+</html>
