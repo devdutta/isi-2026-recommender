@@ -311,6 +311,32 @@
     <p><strong>Purpose.</strong> Install the libraries and load your free Groq key, once, at the top of the notebook. Everything below depends on this cell having run.</p>
     <h4>Input → Output</h4>
     <table><tr><th>In</th><th>Out</th></tr><tr><td>nothing</td><td>all libraries importable · <code>GROQ_API_KEY</code> available via <code>os.environ</code></td></tr></table>
+    <h4>First: get your Groq key and store it as a Colab Secret</h4>
+    <div class="callout c-teal"><strong>Do this before running any code.</strong> You need a free Groq API key, and the safe place to keep it is Colab's 🔑 <strong>Secrets</strong> panel — <em>not</em> typed into a code cell (a key typed in a cell gets pushed to GitHub and disabled). Two steps:
+
+    <p style="margin:12px 0 4px"><strong>Part A — Create your free Groq key</strong> (no credit card):</p>
+    <ol style="margin:0">
+      <li>Go to <a href="https://console.groq.com">https://console.groq.com</a> and sign up for a free account.</li>
+      <li>In the left sidebar, click <strong>API Keys</strong>.</li>
+      <li>Click <strong>Create API Key</strong>, give it a name (e.g. <code>ISI Recommender</code>), and create it.</li>
+      <li><strong>Copy the key immediately</strong> — it starts with <code>gsk_</code> and is shown <em>only once</em>. If you lose it, just create another.</li>
+    </ol>
+
+    <p style="margin:12px 0 4px"><strong>Part B — Add it as a Colab Secret named <code>GROQ_API_KEY</code></strong>:</p>
+    <ol style="margin:0">
+      <li>In your Colab notebook, click the 🔑 key icon in the far-left sidebar to open <strong>Secrets</strong>.</li>
+      <li>Click <strong>+ Add new secret</strong>.</li>
+      <li>In <strong>Name</strong>, type <code>GROQ_API_KEY</code> exactly (all caps, with underscores — the code looks for this exact name).</li>
+      <li>In <strong>Value</strong>, paste your <code>gsk_…</code> key.</li>
+      <li>Turn the <strong>Notebook access</strong> toggle (left of the row) <strong>ON</strong> — without this, your notebook cannot read the secret.</li>
+    </ol>
+    </div>
+
+    <figure style="margin:14px 0;text-align:center">
+      <img src="assets/colab_secret_groq_row.png" alt="A GROQ_API_KEY row in Colab's Secrets panel" style="max-width:420px;width:100%;border:1px solid #d8d8d8;border-radius:6px;padding:6px;background:#1e1e1e">
+      <figcaption style="font-size:0.82rem;color:#666;margin-top:8px;line-height:1.5">The <code>GROQ_API_KEY</code> row in Colab's 🔑 Secrets panel. <strong>Note this crop is only half-done</strong> — to finish, you must <strong>paste your <code>gsk_…</code> value</strong> into the empty Value box <em>and</em> switch the <strong>Notebook access toggle (far left) ON</strong>. It only works once <em>both</em> are set.</figcaption>
+    </figure>
+
     <h4>Starter code</h4>
     <pre><span class="c"># run once, at the very top</span>
 !pip install -q sentence-transformers groq
@@ -320,11 +346,28 @@
 <span class="k">from</span> sklearn.metrics.pairwise <span class="k">import</span> cosine_similarity
 <span class="k">import</span> matplotlib.pyplot <span class="k">as</span> plt
 
-<span class="c"># paste your free Groq key here (get it from console.groq.com — no credit card)</span>
-os.environ[<span class="s">"GROQ_API_KEY"</span>] = <span class="s">"gsk_...your key..."</span></pre>
-    <div class="callout c-rose"><strong>Never commit your API key to GitHub.</strong> Before you push, replace the key with <code>"gsk_...your key..."</code> again, or use Colab's 🔑 Secrets panel. A leaked key gets disabled automatically.</div>
+<span class="c"># load the Groq key from your Colab Secret into the environment</span>
+<span class="k">from</span> google.colab <span class="k">import</span> userdata
+os.environ[<span class="s">"GROQ_API_KEY"</span>] = userdata.get(<span class="s">"GROQ_API_KEY"</span>)
+<span class="k">print</span>(<span class="s">"setup ok ·"</span>, os.environ[<span class="s">"GROQ_API_KEY"</span>][:4])   <span class="c"># should print: setup ok · gsk_</span></pre>
+
+    <p style="margin:14px 0 4px">Then confirm the key actually works with one tiny Groq call:</p>
+    <pre><span class="k">from</span> groq <span class="k">import</span> Groq
+client = Groq()   <span class="c"># automatically reads GROQ_API_KEY from the environment</span>
+resp = client.chat.completions.create(
+    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"Say hello in one short line."</span>}],
+    model=<span class="s">"llama-3.3-70b-versatile"</span>,   <span class="c"># verify current models at console.groq.com/docs/models</span>
+)
+<span class="k">print</span>(resp.choices[0].message.content)</pre>
+
+    <div class="callout c-rose"><strong>Two mistakes that cause <code>GroqError: api_key must be set</code>:</strong>
+    <ul style="margin:6px 0 0">
+      <li><strong>Wrong name.</strong> The secret must be named <code>GROQ_API_KEY</code> — not <code>GROQ</code> or anything else. The same name appears in <code>userdata.get("GROQ_API_KEY")</code>.</li>
+      <li><strong>Secrets are not automatic.</strong> A Colab Secret does <em>not</em> appear in <code>os.environ</code> on its own — you must pull it with <code>userdata.get(...)</code> as shown. <code>os.environ.get("GROQ_API_KEY")</code> alone returns <code>None</code>.</li>
+    </ul>
+    <em>Quick fallback if Secrets give you trouble:</em> you can instead type <code>os.environ["GROQ_API_KEY"] = "gsk_...your key..."</code> directly — but then you <strong>must</strong> delete the key before pushing to GitHub, every time. Secrets avoid that.</div>
     <div class="rep"><b>📄 For your report:</b> note your build environment — Google Colab, Python version, and the libraries you used (with versions: <code>pd.__version__</code> etc.). Feeds the report's <em>Setup / Tools</em> section.</div>
-    <div class="done"><b>✅ Done when:</b> the cell runs with no red errors and <code>print(os.environ["GROQ_API_KEY"][:4])</code> prints <code>gsk_</code>.</div>
+    <div class="done"><b>✅ Done when:</b> the setup cell prints <code>gsk_</code>, and the test call prints a one-line reply from the model with no red errors.</div>
 
     <hr class="mod-sep">
 
