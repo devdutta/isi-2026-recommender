@@ -278,13 +278,17 @@ scores     = cosine_similarity(q_emb, course_emb).flatten()</pre>
     <p>You then <strong>compare</strong> the two: which recommends more relevant courses? That comparison is the heart of the report.</p>
 
     <h3>The LLM flourish (verified Groq quickstart)</h3>
-    <pre><span class="c"># from console.groq.com/docs/quickstart — one call, free tier, no credit card</span>
+    <pre><span class="c"># key loaded from your Colab Secret (full setup in Build Spec M0)</span>
+from google.colab import userdata
+import os
+os.environ["GROQ_API_KEY"] = userdata.get("GROQ_API_KEY")
 from groq import Groq
-client = Groq(api_key=os.environ["GROQ_API_KEY"])
+client = Groq()   # reads GROQ_API_KEY from the environment
 course_list = "\n".join(f"- {t}" for t in best_recs["title"].head(8))
+prompt = f"Turn these courses into a month-by-month roadmap:\n{course_list}"
 resp = client.chat.completions.create(
     model="llama-3.3-70b-versatile",
-    messages=[{"role":"user","content": f"Turn these courses into a month-by-month roadmap:\n{course_list}"}],
+    messages=[{"role":"user","content": prompt}],
 )
 print(resp.choices[0].message.content)</pre>
     <p style="font-size:13px;color:#555">These snippets show the <em>shape</em> of each step (and use the same variables — <code>courses["text"]</code>, <code>query_text</code>, <code>best_recs</code> — throughout). The full, commented, runnable code lives in the <strong>Build Specification</strong>, your build manual.</p>
