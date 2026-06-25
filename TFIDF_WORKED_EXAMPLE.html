@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How TF-IDF ranks courses — Riya's example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --sheet:#ffffff; --ink:#14151a; --ink2:#3a3d47;
+    --dim:#71757f; --faint:#9a9ca6; --line:#ececf1; --line2:#f4f4f7;
+    --teal:#0f9488; --teal-d:#0c7a70; --teal-bg:#e6f6f4; --teal-soft:#f0faf8; --teal-bd:#cdeee9;
+    --amber-bg:#fff7e8; --amber-bd:#f3e2bf; --amber-ink:#9a6b12;
+    --rose-bg:#fdf0ee; --rose-bd:#f6d8d2; --rose-ink:#b04a38;
+    --blue-bg:#eef3fd; --blue-bd:#d3e0f7; --blue-ink:#3a5fa8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:940px;margin:0 auto;background:var(--sheet);min-height:100vh;box-shadow:0 0 60px rgba(20,30,60,.06)}
+
+  header.hero{padding:48px 48px 34px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:14px}
+  h1{font-size:34px;font-weight:800;letter-spacing:-.025em;line-height:1.1}
+  .hero .lede{margin-top:13px;font-size:16.5px;color:var(--ink2);max-width:720px}
+  .qbox{margin-top:22px;background:var(--teal-soft);border:1px solid var(--teal-bd);border-radius:12px;padding:14px 18px}
+  .qbox .qlbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-d);font-weight:700}
+  .qbox .qtext{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);margin-top:5px;font-weight:500}
+
+  section{padding:38px 48px;border-bottom:1px solid var(--line2)}
+  .sec-no{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal);font-weight:500;letter-spacing:.1em}
+  h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px}
+  .sublede{font-size:15px;color:var(--ink2);margin-bottom:16px;max-width:740px}
+  h4{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-d);margin:18px 0 7px}
+  p{margin-bottom:12px;color:var(--ink2)}
+  strong{color:var(--ink);font-weight:700}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#f3f4f7;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#244}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);background:#fafbfc;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  .mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+  .hit{background:var(--teal-bg);color:var(--teal-d);border-radius:4px;padding:0 4px;font-weight:600}
+
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .c-teal{background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d)}
+  .c-amber{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-ink)}
+  .c-rose{background:var(--rose-bg);border:1px solid var(--rose-bd);color:var(--rose-ink)}
+  .callout strong{color:inherit}
+
+  /* flow strip */
+  .flow{display:flex;align-items:stretch;gap:10px;margin:6px 0 8px;flex-wrap:wrap}
+  .fcard{flex:1;min-width:180px;background:#fff;border:1.5px solid var(--teal-bd);border-radius:12px;padding:14px 16px}
+  .fcard .fn{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;color:#fff;background:var(--teal);padding:3px 9px;border-radius:7px;display:inline-block;margin-bottom:8px}
+  .fcard .ft{font-weight:700;font-size:14.5px;color:var(--ink);margin-bottom:3px}
+  .fcard .fd{font-size:13px;color:var(--dim)}
+  .farrow{display:flex;align-items:center;color:var(--teal);font-size:20px;font-weight:800}
+  @media(max-width:680px){.farrow{transform:rotate(90deg)}}
+
+  /* bar rows */
+  .bars{margin:14px 0 6px}
+  .brow{display:grid;grid-template-columns:230px 1fr 60px;align-items:center;gap:12px;padding:7px 0}
+  .brow .bname{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .brow .btrack{background:var(--line2);border-radius:8px;height:22px;position:relative;overflow:hidden}
+  .brow .bfill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--teal),var(--teal-d))}
+  .brow .bscore{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--teal-d);text-align:right}
+  .brow.zero .bfill{background:var(--rose-bd)}
+  .brow.zero .bscore{color:var(--rose-ink)}
+  .brow.idf{grid-template-columns:120px 1fr 60px}
+  .brow.idf .bfill{background:linear-gradient(90deg,#7fc7bf,var(--teal))}
+  @media(max-width:680px){.brow{grid-template-columns:130px 1fr 48px}.brow.idf{grid-template-columns:96px 1fr 48px}}
+
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--teal-bg);border:1px solid var(--teal-bd);color:var(--teal-d);padding:2px 9px;border-radius:30px;white-space:nowrap}
+  .rep{background:var(--blue-bg);border:1px solid var(--blue-bd);border-left:4px solid var(--blue-ink);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:14px;color:var(--blue-ink)}
+  .rep b{color:var(--blue-ink)}
+
+  /* head-to-head product cards */
+  .h2h{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0 6px}
+  @media(max-width:680px){.h2h{grid-template-columns:1fr}}
+  .pcard{border:1.5px solid var(--teal-bd);border-radius:12px;padding:16px 18px;background:#fff}
+  .pcard.win{border-color:var(--teal);background:var(--teal-soft);box-shadow:0 4px 14px rgba(15,148,136,.10)}
+  .pcard h5{font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .pcard .wb{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;background:var(--teal);color:#fff;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .pcard .ph{font-size:11.5px;color:var(--dim);margin-bottom:10px}
+  .prow{display:grid;grid-template-columns:76px 1fr 48px;align-items:center;gap:9px;margin:7px 0}
+  .prow .pw{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink2);font-weight:500}
+  .prow .pt{background:var(--line2);border-radius:6px;height:17px;overflow:hidden}
+  .prow .pf{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-d));border-radius:6px}
+  .prow .pv{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal-d);text-align:right;font-weight:600}
+  .ptot{border-top:1px dashed var(--line);margin-top:11px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:15px;color:var(--teal-d)}
+  .ptot span:first-child{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);font-weight:700}
+
+  footer{padding:26px 48px;color:var(--faint);font-size:12px;font-family:'IBM Plex Mono',monospace}
+  @media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{box-shadow:none;max-width:100%}section{padding:26px 38px}table,.callout,.fcard,.brow,.rep{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="hero">
+    <div class="eyebrow">Module 4 · How the recommender ranks</div>
+    <h1>How TF–IDF picks courses for Riya</h1>
+    <p class="lede">Riya knows <strong>Python</strong> and wants to become a <strong>Data Scientist</strong>. Module 3 worked out the
+    five skills she's still missing. Module 4 turns that gap into a search and ranks every course by how well it matches.
+    Here is exactly what happens — with the real scores the code produces.</p>
+    <div class="qbox">
+      <div class="qlbl">Riya's skill gap → the search query</div>
+      <div class="qtext">statistics &nbsp; machine learning &nbsp; sql &nbsp; data visualization &nbsp; deep learning</div>
+    </div>
+  </header>
+
+  <!-- THE THREE STEPS -->
+  <section>
+    <div class="sec-no">THE IDEA IN THREE STEPS</div>
+    <h2>Match the gap against every course's words</h2>
+    <div class="flow">
+      <div class="fcard"><span class="fn">1</span><div class="ft">Words → numbers</div><div class="fd">Each course becomes a list of numbers, one per word: <b>TF × IDF</b>.</div></div>
+      <div class="farrow">→</div>
+      <div class="fcard"><span class="fn">2</span><div class="ft">Score the overlap</div><div class="fd"><b>Cosine similarity</b> rates each course against Riya's gap, 0 → 1.</div></div>
+      <div class="farrow">→</div>
+      <div class="fcard"><span class="fn">3</span><div class="ft">Rank, take top-K</div><div class="fd">Sort high → low. The top 10 are her recommendations.</div></div>
+    </div>
+    <div class="callout c-teal"><strong>TF</strong> = Term Frequency — how often a word appears <em>in this course</em>.&nbsp;
+    <strong>IDF</strong> = Inverse Document Frequency — how <em>rare</em> the word is across <em>all</em> courses.
+    Multiply them: a word scores high only when it's frequent here <em>and</em> distinctive overall.</div>
+  </section>
+
+  <!-- THE CATALOGUE -->
+  <section>
+    <div class="sec-no">STEP 1A · THE COURSES</div>
+    <h2>Six courses, each reduced to its words</h2>
+    <p class="sublede">This is the <code>text</code> column Module 2 builds — each course's <b>title + skills</b>, lowercased and
+    glued together (the <span style="color:var(--faint)">·</span> below marks where the title ends and the skills begin).
+    The <span class="hit">highlighted</span> words are the ones in Riya's gap. <strong>Notice the repeats:</strong> a word
+    can appear in <em>both</em> the title and the skills — Deep Learning Specialization has <span class="hit">learning</span>
+    <strong>three</strong> times. Common filler words like "for" / "with" are ignored.</p>
+    <table>
+      <tr><th>Course</th><th>Its full <code>text</code> field = title <span style="color:var(--faint)">·</span> skills</th></tr>
+      <tr><td><b>Statistics for Data Science</b></td><td class="mono"><span class="hit">statistics</span> for <span class="hit">data</span> science <span style="color:var(--faint)">·</span> <span class="hit">statistics</span> probability <span class="hit">data</span> analysis</td></tr>
+      <tr><td><b>Machine Learning A-Z</b></td><td class="mono"><span class="hit">machine</span> <span class="hit">learning</span> a z <span style="color:var(--faint)">·</span> <span class="hit">machine</span> <span class="hit">learning</span> python supervised models</td></tr>
+      <tr><td><b>SQL for Data Analysis</b></td><td class="mono"><span class="hit">sql</span> for <span class="hit">data</span> analysis <span style="color:var(--faint)">·</span> <span class="hit">sql</span> databases <span class="hit">data</span> analysis queries</td></tr>
+      <tr><td><b>Data Visualization with Tableau</b></td><td class="mono"><span class="hit">data</span> <span class="hit">visualization</span> with tableau <span style="color:var(--faint)">·</span> <span class="hit">data</span> <span class="hit">visualization</span> dashboards charts</td></tr>
+      <tr><td><b>Deep Learning Specialization</b></td><td class="mono"><span class="hit">deep</span> <span class="hit">learning</span> specialization <span style="color:var(--faint)">·</span> <span class="hit">deep</span> <span class="hit">learning</span> neural networks <span class="hit">machine</span> <span class="hit">learning</span></td></tr>
+      <tr><td><b>Yoga and Meditation Basics</b></td><td class="mono">yoga meditation basics <span style="color:var(--faint)">·</span> yoga meditation breathing wellness</td></tr>
+    </table>
+  </section>
+
+  <!-- IDF -->
+  <section>
+    <div class="sec-no">STEP 1B · RARITY WEIGHTS (IDF)</div>
+    <h2>Rare words count for more</h2>
+    <p class="sublede">These are the real IDF weights from the code. A word in only one course (rare, distinctive)
+    outweighs a word that's everywhere. This is why matching <code>sql</code> is worth more than matching <code>data</code>.</p>
+    <div class="bars">
+      <div class="brow idf"><div class="bname mono">statistics</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bscore">2.25</div></div>
+      <div class="brow idf"><div class="bname mono">sql</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bscore">2.25</div></div>
+      <div class="brow idf"><div class="bname mono">deep</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bscore">2.25</div></div>
+      <div class="brow idf"><div class="bname mono">machine</div><div class="btrack"><div class="bfill" style="width:82%"></div></div><div class="bscore">1.85</div></div>
+      <div class="brow idf"><div class="bname mono">learning</div><div class="btrack"><div class="bfill" style="width:82%"></div></div><div class="bscore">1.85</div></div>
+      <div class="brow idf"><div class="bname mono">data</div><div class="btrack"><div class="bfill" style="width:69%"></div></div><div class="bscore">1.56</div></div>
+    </div>
+    <div class="callout c-amber"><strong>Read it like this:</strong> <code>data</code> shows up in <strong>3 of the 6</strong> courses, so it's
+    common → low weight (1.56). <code>sql</code>, <code>deep</code> and <code>statistics</code> each appear in <strong>only 1</strong>
+    course → distinctive → top weight (2.25). <em>The fewer courses a word is in, the taller its bar.</em> These exact weights
+    are the <code>wt</code> numbers that get multiplied in the scoring step below.</div>
+  </section>
+
+  <!-- RESULTS -->
+  <section>
+    <div class="sec-no">STEP 2 + 3 · THE RANKING</div>
+    <h2>Cosine similarity scores every course</h2>
+    <p class="sublede">Each bar is the real cosine-similarity score between Riya's gap and that course — exactly what
+    <code>tfidf_recs</code> returns, sorted high to low.</p>
+    <div class="bars">
+      <div class="brow"><div class="bname">Deep Learning Specialization</div><div class="btrack"><div class="bfill" style="width:64.7%"></div></div><div class="bscore">0.647</div></div>
+      <div class="brow"><div class="bname">Machine Learning A-Z</div><div class="btrack"><div class="bfill" style="width:49.8%"></div></div><div class="bscore">0.498</div></div>
+      <div class="brow"><div class="bname">Statistics for Data Science</div><div class="btrack"><div class="bfill" style="width:36.0%"></div></div><div class="bscore">0.360</div></div>
+      <div class="brow"><div class="bname">Data Visualization with Tableau</div><div class="btrack"><div class="bfill" style="width:35.4%"></div></div><div class="bscore">0.354</div></div>
+      <div class="brow"><div class="bname">SQL for Data Analysis</div><div class="btrack"><div class="bfill" style="width:32.4%"></div></div><div class="bscore">0.324</div></div>
+      <div class="brow zero"><div class="bname">Yoga and Meditation Basics</div><div class="btrack"><div class="bfill" style="width:1.5%"></div></div><div class="bscore">0.000</div></div>
+    </div>
+    <div class="callout c-teal"><strong>Why "Deep Learning Specialization" wins (0.647):</strong> its words include
+    <span class="hit">deep</span>, <span class="hit">learning</span> (twice) <em>and</em> <span class="hit">machine</span> —
+    several of Riya's high-weight gap words, packed densely. So its vector points most in the same direction as her query.</div>
+    <div class="callout c-rose"><strong>Why "Yoga" scores exactly 0:</strong> it shares <em>no</em> words with Riya's gap.
+    The two vectors point in completely different directions → cosine = 0 → never recommended. This is the clean "off-topic" case.</div>
+  </section>
+
+  <!-- HEAD TO HEAD -->
+  <section>
+    <div class="sec-no">HEAD-TO-HEAD · HOW A SCORE IS BUILT</div>
+    <h2>Why Deep Learning beats Machine Learning A-Z</h2>
+    <p class="sublede">A score is just the matched words added up: for every word Riya's gap shares with a course,
+    multiply <code>query weight × course weight</code>. Only the shared words below score — everything else contributes nothing.</p>
+    <div class="h2h">
+      <div class="pcard win">
+        <h5>Deep Learning Specialization <span class="wb">WINNER</span></h5>
+        <div class="ph">shares <strong>3</strong> of Riya's gap words</div>
+        <div class="prow"><div class="pw">learning</div><div class="pt"><div class="pf" style="width:100%"></div></div><div class="pv">0.389</div></div>
+        <div class="prow"><div class="pw">deep</div><div class="pt"><div class="pf" style="width:50%"></div></div><div class="pv">0.193</div></div>
+        <div class="prow"><div class="pw">machine</div><div class="pt"><div class="pf" style="width:17%"></div></div><div class="pv">0.065</div></div>
+        <div class="ptot"><span>cosine score</span><span>0.647</span></div>
+      </div>
+      <div class="pcard">
+        <h5>Machine Learning A-Z</h5>
+        <div class="ph">shares <strong>2</strong> of Riya's gap words</div>
+        <div class="prow"><div class="pw">learning</div><div class="pt"><div class="pf" style="width:85%"></div></div><div class="pv">0.332</div></div>
+        <div class="prow"><div class="pw">machine</div><div class="pt"><div class="pf" style="width:43%"></div></div><div class="pv">0.166</div></div>
+        <div class="ptot"><span>cosine score</span><span>0.498</span></div>
+      </div>
+    </div>
+    <h4>Drill-down · where the <code>0.664</code> course-weight comes from</h4>
+    <p class="sublede" style="margin-bottom:8px">Take just the word <code>learning</code>. Its weight inside a course =
+    <strong>(TF × IDF) ÷ document length</strong> — count it, scale it up by how rare it is, then scale it <em>down</em> by the
+    course's overall size so a long course doesn't win just for having more words.</p>
+    <table>
+      <tr><th>For the word <code>learning</code></th><th>Deep Learning Spec</th><th>Machine Learning A-Z</th></tr>
+      <tr><td><b>TF</b> — how many times it appears</td><td class="mono"><b>3</b></td><td class="mono"><b>2</b></td></tr>
+      <tr><td><b>× IDF</b> &nbsp;(1.847 — same for both)</td><td class="mono">3 × 1.847 = 5.54</td><td class="mono">2 × 1.847 = 3.70</td></tr>
+      <tr><td><b>÷ document length</b> &nbsp;(the normaliser)</td><td class="mono">÷ 8.35</td><td class="mono">÷ 6.52</td></tr>
+      <tr><td><b>= final course weight</b></td><td class="mono"><b style="color:var(--teal-d)">0.664</b></td><td class="mono"><b style="color:var(--teal-d)">0.567</b></td></tr>
+    </table>
+    <div class="callout c-amber"><strong>The whole reason:</strong> <span class="hit">learning</span> is mentioned
+    <strong>3 times</strong> in Deep Learning Specialization but only <strong>2 times</strong> in Machine Learning A-Z.
+    Higher count → higher weight → bigger score — even after the length-scaling trims both down.</div>
+
+    <div class="callout c-teal"><strong>The deciding factor:</strong> on the two words they <em>both</em> have
+    (<span class="hit">machine</span>, <span class="hit">learning</span>), Machine Learning A-Z actually scores a hair higher.
+    Deep Learning wins only because it <em>also</em> contains <span class="hit">deep</span> — a skill Riya needs that
+    Machine Learning A-Z never mentions. <strong>Matching one more of her gap words (+0.193) tips it.</strong></div>
+  </section>
+
+  <!-- HONEST POINT -->
+  <section>
+    <div class="sec-no">THE HONEST CATCH</div>
+    <h2>TF–IDF rewards overlap, not coverage</h2>
+    <p class="sublede">Notice the winner covers only <strong>2 of Riya's 5</strong> gap skills (machine learning + deep
+    learning) — yet still ranks first, because it matches <em>those</em> words heavily. TF–IDF has no idea Riya needs all
+    five, and it only matches <strong>exact words</strong> — a course that said "ML" instead of "machine learning" would score 0.</p>
+    <div class="rep"><b>This is the whole reason the project continues:</b> <strong>M5 (embeddings)</strong> fixes the
+    exact-word problem — it understands that "ML" ≈ "machine learning". <strong>M6 (precision@k)</strong> then measures,
+    with numbers, which recommender actually gives better results. TF–IDF is the honest baseline you compare against.</div>
+    <div class="callout c-teal"><strong>Say it in one breath:</strong> "Turn every course into a bag of weighted words,
+    turn Riya's gap into the same kind of bag, then score each course by how much its distinctive words overlap with hers.
+    Yoga shares nothing → 0. Deep Learning shares the most → top."</div>
+  </section>
+
+  <footer>ISI Summer Internship 2026 · AI Course Recommender · Module 4 worked example · numbers produced by the same scikit-learn TF-IDF + cosine code you build</footer>
+</div>
+</body>
+</html>
