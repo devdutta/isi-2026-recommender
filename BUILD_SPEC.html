@@ -717,7 +717,7 @@ roadmap_text = resp.choices[0].message.content
     <!-- MODULE 8 -->
     <div class="mhead"><span class="badge opt">MODULE 8</span><h3 style="margin:0">Optional UI — only if everything else is done</h3><span class="due">🗓 Sprint 4–5 · optional</span></div>
     <p><strong>Purpose.</strong> Wrap Modules 3→7 behind simple input boxes so a non-coder can use it. <strong>Do not start this until the notebook is complete and the report is drafted.</strong> It earns no extra marks on its own — it is a demo nicety.</p>
-    <div class="callout c-teal">The Handbook calls this the <em>optional demo</em>. Two ways to build it: <strong><code>ipywidgets</code></strong> (simplest — stays inside the notebook, shown below) or a <strong><code>streamlit</code></strong> app (separate file, more work). Either is fine; both are optional.</div>
+    <div class="callout c-teal">The Handbook calls this the <em>optional demo</em>. Two good ways to build it: <strong><code>ipywidgets</code></strong> (simplest — stays inside the notebook, shown below), or <strong><code>Gradio</code></strong> (a real web UI that <em>runs in Colab</em> and gives you a shareable public link with <code>demo.launch(share=True)</code>). <strong>Prefer Gradio if you want a "tool" to show off</strong> — and ask your mentor for the ready-made Gradio wrapper if you'd rather not build it from scratch. <em>(Streamlit also exists but does <strong>not</strong> run cleanly in Colab, so skip it here.)</em> All are optional.</div>
     <h4>Simplest version — inside the notebook, no extra tools</h4>
     <pre><span class="k">import</span> ipywidgets <span class="k">as</span> widgets
 skills = widgets.Text(description=<span class="s">"Your skills:"</span>)            <span class="c"># comma-separated</span>
