@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How embeddings read meaning, and how we measure the winner — Riya's example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --sheet:#ffffff; --ink:#14151a; --ink2:#3a3d47;
+    --dim:#71757f; --faint:#9a9ca6; --line:#ececf1; --line2:#f4f4f7;
+    --teal:#0f9488; --teal-d:#0c7a70; --teal-bg:#e6f6f4; --teal-soft:#f0faf8; --teal-bd:#cdeee9;
+    --amber-bg:#fff7e8; --amber-bd:#f3e2bf; --amber-ink:#9a6b12;
+    --rose-bg:#fdf0ee; --rose-bd:#f6d8d2; --rose-ink:#b04a38;
+    --blue-bg:#eef3fd; --blue-bd:#d3e0f7; --blue-ink:#3a5fa8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:940px;margin:0 auto;background:var(--sheet);min-height:100vh;box-shadow:0 0 60px rgba(20,30,60,.06)}
+
+  header.hero{padding:48px 48px 34px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:14px}
+  h1{font-size:34px;font-weight:800;letter-spacing:-.025em;line-height:1.1}
+  .hero .lede{margin-top:13px;font-size:16.5px;color:var(--ink2);max-width:720px}
+  .qbox{margin-top:22px;background:var(--teal-soft);border:1px solid var(--teal-bd);border-radius:12px;padding:14px 18px}
+  .qbox .qlbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-d);font-weight:700}
+  .qbox .qtext{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);margin-top:5px;font-weight:500}
+
+  section{padding:38px 48px;border-bottom:1px solid var(--line2)}
+  .sec-no{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal);font-weight:500;letter-spacing:.1em}
+  h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px}
+  .sublede{font-size:15px;color:var(--ink2);margin-bottom:16px;max-width:740px}
+  h4{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-d);margin:18px 0 7px}
+  p{margin-bottom:12px;color:var(--ink2)}
+  strong{color:var(--ink);font-weight:700}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#f3f4f7;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#244}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);background:#fafbfc;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  .mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+  .hit{background:var(--teal-bg);color:var(--teal-d);border-radius:4px;padding:0 4px;font-weight:600}
+  .ok{color:var(--teal-d);font-weight:700}
+  .no{color:var(--rose-ink);font-weight:700}
+  .ctr{text-align:center}
+
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .c-teal{background:var(--teal-soft);border:1px solid var(--teal-bd);color:var(--teal-d)}
+  .c-amber{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-ink)}
+  .c-rose{background:var(--rose-bg);border:1px solid var(--rose-bd);color:var(--rose-ink)}
+  .callout strong{color:inherit}
+
+  /* flow strip */
+  .flow{display:flex;align-items:stretch;gap:10px;margin:6px 0 8px;flex-wrap:wrap}
+  .fcard{flex:1;min-width:180px;background:#fff;border:1.5px solid var(--teal-bd);border-radius:12px;padding:14px 16px}
+  .fcard .fn{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;color:#fff;background:var(--teal);padding:3px 9px;border-radius:7px;display:inline-block;margin-bottom:8px}
+  .fcard .ft{font-weight:700;font-size:14.5px;color:var(--ink);margin-bottom:3px}
+  .fcard .fd{font-size:13px;color:var(--dim)}
+  .farrow{display:flex;align-items:center;color:var(--teal);font-size:20px;font-weight:800}
+  @media(max-width:680px){.farrow{transform:rotate(90deg)}}
+
+  /* bar rows */
+  .bars{margin:14px 0 6px}
+  .brow{display:grid;grid-template-columns:230px 1fr 60px;align-items:center;gap:12px;padding:7px 0}
+  .brow .bname{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .brow .btrack{background:var(--line2);border-radius:8px;height:22px;position:relative;overflow:hidden}
+  .brow .bfill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--teal),var(--teal-d))}
+  .brow .bscore{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--teal-d);text-align:right}
+  .brow.zero .bfill{background:var(--rose-bd)}
+  .brow.zero .bscore{color:var(--rose-ink)}
+  @media(max-width:680px){.brow{grid-template-columns:150px 1fr 48px}}
+
+  .rep{background:var(--blue-bg);border:1px solid var(--blue-bd);border-left:4px solid var(--blue-ink);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:14px;color:var(--blue-ink)}
+  .rep b{color:var(--blue-ink)}
+
+  /* head-to-head ranked lists */
+  .h2h{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0 6px}
+  @media(max-width:680px){.h2h{grid-template-columns:1fr}}
+  .pcard{border:1.5px solid var(--teal-bd);border-radius:12px;padding:16px 18px;background:#fff}
+  .pcard h5{font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:3px}
+  .pcard .ph{font-size:11.5px;color:var(--dim);margin-bottom:10px}
+  .rk{display:grid;grid-template-columns:22px 1fr 46px;align-items:center;gap:9px;margin:6px 0;font-size:13px}
+  .rk .rn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#fff;background:var(--teal);border-radius:6px;text-align:center;padding:2px 0;font-weight:700}
+  .rk .rt{color:var(--ink2)}
+  .rk .rv{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--teal-d);text-align:right;font-weight:600}
+  .rk.dim .rn{background:var(--rose-bd);color:#fff}
+  .rk.move .rt{font-weight:700;color:var(--ink)}
+  .rk.move .rt::after{content:" ↑";color:var(--teal-d);font-weight:800}
+
+  footer{padding:26px 48px;color:var(--faint);font-size:12px;font-family:'IBM Plex Mono',monospace}
+  @media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{box-shadow:none;max-width:100%}section{padding:26px 38px}table,.callout,.fcard,.brow,.rep,.pcard{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="hero">
+    <div class="eyebrow">Modules 5 &amp; 6 · Meaning, then measuring</div>
+    <h1>From matching words to understanding meaning</h1>
+    <p class="lede">Module 4 matched Riya's skill gap against each course's <em>words</em>. It works, but it has one blind
+    spot: it only sees <strong>exact words</strong>. <strong>Module 5</strong> fixes that — it reads what a course <em>means</em>.
+    <strong>Module 6</strong> then measures, with numbers, which recommender is actually better. Same Riya, same six courses,
+    real scores from the code.</p>
+    <div class="qbox">
+      <div class="qlbl">Riya's skill gap → the search query (unchanged from Module 4)</div>
+      <div class="qtext">statistics &nbsp; machine learning &nbsp; sql &nbsp; data visualization &nbsp; deep learning</div>
+    </div>
+  </header>
+
+  <!-- WHERE M4 LEFT OFF -->
+  <section>
+    <div class="sec-no">WHERE MODULE 4 LEFT OFF</div>
+    <h2>TF–IDF only sees the exact words</h2>
+    <p class="sublede">TF–IDF scored a course by how many of Riya's <em>exact</em> gap words it contained. That means a course
+    can be about precisely the right topic and still score <strong>zero</strong> — simply because it phrased things differently.</p>
+    <div class="callout c-rose"><strong>The blind spot in one line:</strong> to TF–IDF, <code>"ML"</code>, <code>"neural networks"</code>
+    and <code>"machine learning"</code> are three unrelated strings of letters. A great course that says "neural networks" instead
+    of "machine learning" gets <strong>0</strong> — and never reaches Riya. Module 5 is built to fix exactly this.</p>
+  </section>
+
+  <!-- M5 THE IDEA -->
+  <section>
+    <div class="sec-no">MODULE 5 · THE IDEA IN THREE STEPS</div>
+    <h2>Turn meaning — not words — into numbers</h2>
+    <div class="flow">
+      <div class="fcard"><span class="fn">1</span><div class="ft">Meaning → numbers</div><div class="fd">A pretrained model <b>reads</b> each course and outputs numbers that capture what it's <b>about</b>.</div></div>
+      <div class="farrow">→</div>
+      <div class="fcard"><span class="fn">2</span><div class="ft">Score the closeness</div><div class="fd"><b>Cosine similarity</b> — the same 0→1 score as Module 4 — rates each course against Riya's gap.</div></div>
+      <div class="farrow">→</div>
+      <div class="fcard"><span class="fn">3</span><div class="ft">Rank, take top-K</div><div class="fd">Sort high → low. The top 10 are her recommendations.</div></div>
+    </div>
+    <div class="callout c-teal"><strong>The one thing that changes:</strong> only <em>Step 1</em> is new. Steps 2 and 3
+    (cosine similarity → sort → top-K) are <strong>identical</strong> to Module 4. So the two recommenders differ in exactly one
+    place: <strong>how text becomes numbers</strong> — by counting words (TF–IDF) or by reading meaning (embeddings).</div>
+    <h4>What is an "embedding"?</h4>
+    <p>Think of a huge <strong>map of topics</strong>. A pretrained model (we use a small, free one called
+    <code>all-MiniLM-L6-v2</code>) places every course as a dot on this map, so that courses about <em>similar things sit close
+    together</em> — even if they never share a single word. An <strong>embedding</strong> is just that dot's position, written as
+    a list of numbers. "Close on the map" = "similar meaning".</p>
+  </section>
+
+  <!-- M5 SUPERPOWER -->
+  <section>
+    <div class="sec-no">MODULE 5 · THE SUPERPOWER</div>
+    <h2>It catches courses TF–IDF throws away</h2>
+    <p class="sublede">Here is the same query — <code>machine learning</code> — scored against two courses, by both methods.
+    These are <strong>real scores</strong> from the code.</p>
+    <table>
+      <tr><th>Course</th><th class="ctr">TF–IDF <span style="font-weight:400;text-transform:none">(exact words)</span></th><th class="ctr">Embeddings <span style="font-weight:400;text-transform:none">(meaning)</span></th></tr>
+      <tr><td>"machine learning fundamentals"</td><td class="ctr mono"><span class="ok">0.73</span> ✓ shares the words</td><td class="ctr mono"><span class="ok">0.76</span> ✓</td></tr>
+      <tr><td>"deep neural networks and AI"</td><td class="ctr mono"><span class="no">0.00</span> ✕ no shared words</td><td class="ctr mono"><span class="ok">0.53</span> ✓ related meaning</td></tr>
+    </table>
+    <div class="callout c-amber"><strong>Read the second row:</strong> "deep neural networks and AI" shares <em>no words</em> with
+    "machine learning", so TF–IDF scores it <strong>0.00</strong> and drops it. Embeddings know the two are about the same field,
+    so they score it <strong>0.53</strong> and keep it. <strong>That extra reach is the whole point of Module 5.</strong>
+    Whether it produces <em>better</em> recommendations for Riya is what Module 6 measures.</div>
+  </section>
+
+  <!-- M5 RIYA'S RANKING -->
+  <section>
+    <div class="sec-no">MODULE 5 · RIYA'S RESULTS</div>
+    <h2>The same six courses, ranked by meaning</h2>
+    <p class="sublede">Each bar is the real embedding cosine score between Riya's gap and that course — what <code>embed_recs</code>
+    returns. (Embedding scores sit lower than TF–IDF's — that's normal; only the <em>order</em> matters for ranking.)</p>
+    <div class="bars">
+      <div class="brow"><div class="bname">Data Visualization with Tableau</div><div class="btrack"><div class="bfill" style="width:48.8%"></div></div><div class="bscore">0.488</div></div>
+      <div class="brow"><div class="bname">Deep Learning Specialization</div><div class="btrack"><div class="bfill" style="width:43.8%"></div></div><div class="bscore">0.438</div></div>
+      <div class="brow"><div class="bname">SQL for Data Analysis</div><div class="btrack"><div class="bfill" style="width:42.5%"></div></div><div class="bscore">0.425</div></div>
+      <div class="brow"><div class="bname">Statistics for Data Science</div><div class="btrack"><div class="bfill" style="width:33.5%"></div></div><div class="bscore">0.335</div></div>
+      <div class="brow"><div class="bname">Machine Learning A-Z</div><div class="btrack"><div class="bfill" style="width:31.2%"></div></div><div class="bscore">0.312</div></div>
+      <div class="brow zero"><div class="bname">Yoga and Meditation Basics</div><div class="btrack"><div class="bfill" style="width:1.8%"></div></div><div class="bscore">0.018</div></div>
+    </div>
+    <div class="callout c-teal"><strong>Both methods agree on the easy call:</strong> Yoga is off-topic, so it sits dead last
+    either way (embeddings <strong>0.018</strong>, TF–IDF <strong>0.000</strong>). The interesting part is the <em>order of the
+    five good courses</em> — which the two methods disagree about.</div>
+
+    <h4>Head-to-head · the two orderings</h4>
+    <div class="h2h">
+      <div class="pcard">
+        <h5>Module 4 · TF–IDF</h5>
+        <div class="ph">ranks by how densely the exact words repeat</div>
+        <div class="rk"><span class="rn">1</span><span class="rt">Deep Learning Specialization</span><span class="rv">0.647</span></div>
+        <div class="rk"><span class="rn">2</span><span class="rt">Machine Learning A-Z</span><span class="rv">0.498</span></div>
+        <div class="rk"><span class="rn">3</span><span class="rt">Statistics for Data Science</span><span class="rv">0.360</span></div>
+        <div class="rk"><span class="rn">4</span><span class="rt">Data Visualization w/ Tableau</span><span class="rv">0.354</span></div>
+        <div class="rk"><span class="rn">5</span><span class="rt">SQL for Data Analysis</span><span class="rv">0.324</span></div>
+        <div class="rk dim"><span class="rn">6</span><span class="rt">Yoga and Meditation Basics</span><span class="rv">0.000</span></div>
+      </div>
+      <div class="pcard">
+        <h5>Module 5 · Embeddings</h5>
+        <div class="ph">ranks by how close the topics are in meaning</div>
+        <div class="rk move"><span class="rn">1</span><span class="rt">Data Visualization w/ Tableau</span><span class="rv">0.488</span></div>
+        <div class="rk"><span class="rn">2</span><span class="rt">Deep Learning Specialization</span><span class="rv">0.438</span></div>
+        <div class="rk move"><span class="rn">3</span><span class="rt">SQL for Data Analysis</span><span class="rv">0.425</span></div>
+        <div class="rk"><span class="rn">4</span><span class="rt">Statistics for Data Science</span><span class="rv">0.335</span></div>
+        <div class="rk"><span class="rn">5</span><span class="rt">Machine Learning A-Z</span><span class="rv">0.312</span></div>
+        <div class="rk dim"><span class="rn">6</span><span class="rt">Yoga and Meditation Basics</span><span class="rv">0.018</span></div>
+      </div>
+    </div>
+    <div class="callout c-amber"><strong>Why the shuffle?</strong> TF–IDF put <em>Deep Learning</em> first because it <em>repeats</em>
+    the word "learning" three times — repetition it rewards. Embeddings lifted <em>Data Visualization</em> (↑ from 4th to 1st) and
+    <em>SQL</em> (↑ from 5th to 3rd) because, as pure "data" topics, their <strong>overall meaning</strong> sits closest to Riya's
+    data-science gap. Neither ordering is obviously "right" — <strong>which is exactly why we now measure.</strong></div>
+  </section>
+
+  <!-- M6 GROUND TRUTH -->
+  <section>
+    <div class="sec-no">MODULE 6 · THE CORRECT ANSWER</div>
+    <h2>To grade a list, first define "relevant"</h2>
+    <p class="sublede">You cannot say which recommender is better until you agree what a <em>good</em> recommendation is. We fix
+    one simple, honest rule — the same one for both methods — called <code>is_relevant()</code>.</p>
+    <div class="callout c-teal"><strong>The rule:</strong> a course counts as <span class="ok">relevant</span> if <em>any</em> of
+    Riya's five gap skills appears — <strong>as a whole word</strong> — in that course's skills. Nothing fancier.</div>
+    <p><strong>Why "whole word"?</strong> So <code>statistics</code> correctly matches the course phrase
+    "<span class="hit">statistics</span> probability data analysis". Whole-word matching keeps it honest — it counts a real skill
+    match, not an accidental letter overlap.</p>
+    <table>
+      <tr><th>Course</th><th>A gap skill in its skills?</th><th class="ctr">Verdict</th></tr>
+      <tr><td>Statistics for Data Science</td><td class="mono"><span class="hit">statistics</span> ✓</td><td class="ctr"><span class="ok">relevant ✓</span></td></tr>
+      <tr><td>Machine Learning A-Z</td><td class="mono"><span class="hit">machine learning</span> ✓</td><td class="ctr"><span class="ok">relevant ✓</span></td></tr>
+      <tr><td>SQL for Data Analysis</td><td class="mono"><span class="hit">sql</span> ✓</td><td class="ctr"><span class="ok">relevant ✓</span></td></tr>
+      <tr><td>Data Visualization with Tableau</td><td class="mono"><span class="hit">data visualization</span> ✓</td><td class="ctr"><span class="ok">relevant ✓</span></td></tr>
+      <tr><td>Deep Learning Specialization</td><td class="mono"><span class="hit">deep learning</span> ✓</td><td class="ctr"><span class="ok">relevant ✓</span></td></tr>
+      <tr><td>Yoga and Meditation Basics</td><td class="mono">yoga meditation breathing wellness</td><td class="ctr"><span class="no">not relevant ✕</span></td></tr>
+    </table>
+  </section>
+
+  <!-- M6 PRECISION -->
+  <section>
+    <div class="sec-no">MODULE 6 · THE SCORE</div>
+    <h2>precision@k — the fraction that were right</h2>
+    <p class="sublede"><strong>precision@k</strong> asks a single question: of the top <strong>k</strong> courses a method
+    recommended, how many were actually relevant? Count the ✓, divide by k. That's it.</p>
+    <div class="callout c-teal"><strong>precision@5 for the embedding list</strong> — its top 5 are Data Visualization ✓, Deep
+    Learning ✓, SQL ✓, Statistics ✓, Machine Learning ✓ → <strong>5 relevant out of 5</strong> →
+    <strong>precision@5 = 5 ÷ 5 = 1.00</strong>. TF–IDF's top 5 are the same five courses in a different order → also
+    <strong>1.00</strong>.</p>
+    <div class="callout c-amber"><strong>What a "miss" would look like:</strong> stretch to the top <strong>6</strong> and Yoga
+    gets pulled in — one <span class="no">✕</span>. Now it's <strong>5 right out of 6 → precision@6 = 0.83</strong>. That is how an
+    off-topic recommendation drags the score down. (A perfect 1.00 just means <em>no junk in the top k</em>.)</p>
+  </section>
+
+  <!-- M6 HONEST CATCH -->
+  <section>
+    <div class="sec-no">MODULE 6 · THE HONEST CATCH</div>
+    <h2>Sometimes the number can't pick a winner</h2>
+    <p class="sublede">On our toy six, both methods scored precision@5 = 1.00 — a tie. And here is the honest part you should
+    put in your report: <strong>on the full 623-course dataset, both methods also score precision@10 = 1.00</strong> for Riya.
+    A tie again.</p>
+    <div class="callout c-rose"><strong>Why the tie?</strong> Our <code>is_relevant()</code> rule is <em>generous</em> — with 600+
+    courses, almost anything either method puts in the top 10 happens to contain one of the gap skills, so both look "perfect".
+    precision@k simply isn't sharp enough to separate them here. <strong>This is a real limitation, not a mistake — name it.</strong></div>
+    <div class="callout c-teal"><strong>So what's actually different?</strong> Not the <em>score</em> — the <em>courses</em>. TF–IDF
+    surfaces literal keyword matches; embeddings surface topically-related courses (some with no shared words at all). The right
+    conclusion isn't "X wins by the number" — it's "here's how the two lists differ, and here's when you'd trust each."</div>
+    <div class="rep"><b>📄 For your report:</b> report both precision@k numbers <em>and</em> the tie. Then put the two top-10 lists
+    side by side and describe the <em>qualitative</em> difference. Stating the metric's limit honestly is worth more marks than a
+    fake winner. Feeds <em>Evaluation &amp; Discussion</em>.</div>
+  </section>
+
+  <!-- ONE BREATH -->
+  <section>
+    <div class="sec-no">SAY IT IN ONE BREATH</div>
+    <h2>The whole of Modules 5 &amp; 6</h2>
+    <div class="callout c-teal"><strong>Module 5 (embeddings):</strong> "Instead of counting words, a pretrained model turns each
+    course into numbers that capture its <em>meaning</em>, so a course about 'neural networks' can match 'machine learning' even
+    with no shared words. Then rank by closeness — exactly like Module 4."</div>
+    <div class="callout c-teal"><strong>Module 6 (evaluate):</strong> "Mark each recommended course right or wrong with one fixed
+    rule, count the fraction correct in the top k (precision@k), and compare the two methods — being honest when the number can't
+    tell them apart."</div>
+  </section>
+
+  <footer>ISI Summer Internship 2026 · AI Course Recommender · Modules 5 &amp; 6 worked example · embedding numbers produced by the same all-MiniLM-L6-v2 + cosine code you build</footer>
+</div>
+</body>
+</html>
