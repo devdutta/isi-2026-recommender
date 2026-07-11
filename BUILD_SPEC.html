@@ -649,6 +649,10 @@ p_embed = precision_at_k(embed_recs, courses, skill_gap, k=10)
 
 eval_table = pd.DataFrame({<span class="s">"method"</span>:[<span class="s">"TF-IDF"</span>,<span class="s">"Embedding"</span>],
                            <span class="s">"precision@10"</span>:[p_tfidf, p_embed]})
+<span class="c"># NOTE ON TIES: `&gt;=` means "greater than OR equal to". When both scores are equal</span>
+<span class="c"># (e.g. 1.0 == 1.0), the "greater" half is False but the "equal" half is True — and an</span>
+<span class="c"># OR is True if either half is True. So a tie makes the condition True and Embedding wins.</span>
+<span class="c"># (If you'd rather a tie go to TF-IDF, use `&gt;` instead of `&gt;=`.)</span>
 winner = <span class="s">"Embedding"</span> <span class="k">if</span> p_embed &gt;= p_tfidf <span class="k">else</span> <span class="s">"TF-IDF"</span>
 
 eval_table.plot.bar(x=<span class="s">"method"</span>, y=<span class="s">"precision@10"</span>, legend=<span class="k">False</span>)
